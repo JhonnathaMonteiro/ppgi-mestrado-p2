@@ -14,7 +14,7 @@ caixeiro viajante.
 
 * g++.
 
-### Installing
+### Instalação
 
 Na pasta do projeto.
 
@@ -23,7 +23,7 @@ make all
 ```
 
 
-### Executing program
+### Execução
 
 * Como executar
 ```
