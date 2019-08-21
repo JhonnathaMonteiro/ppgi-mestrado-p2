@@ -1,7 +1,7 @@
-#include "gils_rvnd.h"
-#include "construction.h"
-#include "movements.h"
-#include "utils.h"
+#include <gils_rvnd.h>
+#include <construction.h>
+#include <movements.h>
+#include <utils.h>
 
 // Geracao de numeros randomicos baseados na distribuicao uniforme
 std::random_device rseed;
@@ -124,14 +124,13 @@ std::vector<int> rvnd(std::vector<int> s, double **c)
 
 std::vector<int> pertub(std::vector<int> s)
 {
-    int N = s.size();
 
     // Utilizando shuffle para gerar os distrubios em s
     auto rng = std::default_random_engine{};
     std::shuffle(s.begin() + 1, s.end() - 1, rng);
 
     return s;
-};
+}
 
 void eraseByValue2(std::vector<int> &vec, int val)
 {
@@ -141,7 +140,7 @@ void eraseByValue2(std::vector<int> &vec, int val)
 double f(std::vector<int> &s, double **c)
 {
     double val = 0;
-    for (int i = 0, j = 1; i < s.size() - 1; i++, j++)
+    for (int i = 0, j = 1; i < (int)(s.size() - 1); i++, j++)
     {
         val += c[s[i]][s[j]];
     }

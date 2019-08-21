@@ -1,5 +1,5 @@
-#include "construction.h"
-#include "utils.h"
+#include <construction.h>
+#include <utils.h>
 
 using namespace std;
 
@@ -13,7 +13,7 @@ struct InsertionInfo
 bool compareByCusto(const InsertionInfo &a, const InsertionInfo &b)
 {
     return a.custo < b.custo;
-};
+}
 
 void eraseByValue(std::vector<int> &vec, int val)
 {
@@ -36,7 +36,7 @@ std::vector<int> construction(int N, double alpha, double **c)
     for (int m = 0; m < (N - 1); m++)
     {
 
-        for (int i = 0, j = 1, l = 0; i < s.size() - 1; i++, j++)
+        for (int i = 0, j = 1, l = 0; i < (int)(s.size() - 1); i++, j++)
         {
             for (int k : listaDeCandidatos)
             {

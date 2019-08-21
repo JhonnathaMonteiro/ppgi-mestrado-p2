@@ -12,7 +12,8 @@ caixeiro viajante.
 
 ### Dependencias
 
-* g++.
+* C++11
+* g++
 
 ### Instalação
 
@@ -27,12 +28,12 @@ make all
 
 * Como executar
 ```
-./GILS-RVND-TSP [path to instance file]
+[path to program] [path to instance file]
 ```
 
 * Exemplo
 ```
-./GILS-RVND-TSP ./instances/gr17.tsp
+./build/apps/program instances/att48.tsp
 ```
 
 ## Autor

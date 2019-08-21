@@ -1,5 +1,5 @@
-#include "movements.h"
-#include "utils.h"
+#include <movements.h>
+#include <utils.h>
 
 struct melhor_movimento
 {
@@ -96,13 +96,6 @@ std::vector<int> two_opt(std::vector<int> s, double f_s, double **c)
         {
 
             _f_s = f_s; // Valor da solucao a ser avaliada
-
-            // Para funcionar com dados assimetricos
-            // Invertendo sub
-            for (int l = i + 1; l < j; l++)
-            {
-                _f_s = _f_s - c[s[l]][s[l + 1]] + c[s[l + 1]][s[l]]; // Invercao
-            }
 
             _f_s = _f_s - c[s[i]][s[i + 1]]; // Primeira quebra
             _f_s = _f_s - c[s[j]][s[j + 1]]; // Segunda quebra

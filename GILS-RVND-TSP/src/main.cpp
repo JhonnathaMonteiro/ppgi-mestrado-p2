@@ -1,6 +1,6 @@
-#include "readData.h"
-#include "construction.h"
-#include "gils_rvnd.h"
+#include <readData.h>
+#include <construction.h>
+#include <gils_rvnd.h>
 #include <fstream>
 #include <iostream>
 
@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     // const char *filepath = "../instances/pr226.tsp";
 
     // Ler instancia
-    readData(argv, &dimension, &matrizAdj);
+    readData(argc, argv, &dimension, &matrizAdj);
 
     int Imax = 50;
     int Iils;
@@ -37,7 +37,8 @@ int main(int argc, char **argv)
     std::cout << "Instancia: " << argv[1] << endl;
 
     double distancia = 0;
-    for (int i = 0, j = 1; i < tour.size() - 1; i++, j++)
+    int tourSize = tour.size() - 1;
+    for (int i = 0, j = 1; i < tourSize; i++, j++)
     {
         distancia += matrizAdj[tour[i]][tour[j]];
     }

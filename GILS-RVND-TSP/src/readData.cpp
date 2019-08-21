@@ -10,8 +10,22 @@ double CalcDistAtt(double *X, double *Y, int I, int J);
 void CalcLatLong(double *X, double *Y, int n, double *latit, double *longit);
 double CalcDistGeo(double *latit, double *longit, int I, int J);
 
-void readData(char **argv, int *Dimension, double ***Mdist)
+void readData(int argc, char **argv, int *Dimension, double ***Mdist)
 {
+
+    if (argc < 2)
+    {
+        cout << "\nFaltando parametros\n";
+        cout << " ./exec [Instancia] " << endl;
+        exit(1);
+    }
+
+    if (argc > 2)
+    {
+        cout << "\nMuitos parametros\n";
+        cout << " ./exec [Instancia] " << endl;
+        exit(1);
+    }
 
     int N;
     string arquivo, ewt;
