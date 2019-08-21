@@ -7,45 +7,7 @@
 std::random_device rseed;
 std::mt19937 rgen(rseed());
 
-double f(std::vector<int> &s, double **c)
-{
-    double val = 0;
-    for (int i = 0, j = 1; i < s.size() - 1; i++, j++)
-    {
-        val += c[s[i]][s[j]];
-    }
-    return val;
-}
-
-// Funcao para escolher randomicamente um elemento em um vetor
-// -------------------------------------------------
-template <typename Iter, typename RandomGenerator>
-Iter select_randomly(Iter start, Iter end, RandomGenerator &g)
-{
-    std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
-    std::advance(start, dis(g));
-    return start;
-}
-
-template <typename Iter>
-Iter select_randomly(Iter start, Iter end)
-{
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    return select_randomly(start, end, gen);
-}
-// -------------------------------------------------
-// Funcao gerar um random int no intervalo [a,b]
-int randInt(int a, int b)
-{
-    std::random_device rseed;
-    std::mt19937 rgen(rseed());
-    std::uniform_int_distribution<int> idist(a, b);
-
-    return idist(rgen);
-}
-// -------------------------------------------------
-
+double f(std::vector<int> &, double **);
 void eraseByValue2(std::vector<int> &, int);
 std::vector<int> rvnd(std::vector<int>, double **);
 std::vector<int> pertub(std::vector<int>);
@@ -125,7 +87,7 @@ std::vector<int> rvnd(std::vector<int> s, double **c)
     {
 
         // Escolher randomicamente uma estrutura NL_n em NL
-        int NL_n = *select_randomly(NL.begin(), NL.end());
+        int NL_n = *getRandonEle(NL.begin(), NL.end());
 
         double f_s = f(s, c); // para reduzir a quatidade de vezes que f e chamada
 
@@ -174,4 +136,14 @@ std::vector<int> pertub(std::vector<int> s)
 void eraseByValue2(std::vector<int> &vec, int val)
 {
     vec.erase(std::remove(vec.begin(), vec.end(), val), vec.end());
+}
+
+double f(std::vector<int> &s, double **c)
+{
+    double val = 0;
+    for (int i = 0, j = 1; i < s.size() - 1; i++, j++)
+    {
+        val += c[s[i]][s[j]];
+    }
+    return val;
 }

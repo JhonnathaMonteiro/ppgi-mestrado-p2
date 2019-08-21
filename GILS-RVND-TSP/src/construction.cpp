@@ -1,4 +1,5 @@
 #include "construction.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -52,13 +53,8 @@ std::vector<int> construction(int N, double alpha, double **c)
         // Escolher randomicamente um dos alphaN primeiros elementos de custoInsercao
         int alphaN = std::round(alpha * (listaDeCandidatos.size() - 1));
 
-        // Geracao de numeros randomicos baseados na distribuicao uniforme <int>
-        std::random_device rseed;
-        std::mt19937 rgen(rseed());
-        std::uniform_int_distribution<int> idist(0, alphaN);
-
         // Elemento escolhido n
-        int n = idist(rgen);
+        int n = getRandInt(0, alphaN);
 
         // Inserindo elemento no subtour
         s.insert(s.begin() + custoInsercao[n].arestaRemovida + 1, custoInsercao[n].noInserido);

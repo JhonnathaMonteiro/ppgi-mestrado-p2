@@ -10,15 +10,16 @@ double CalcDistAtt(double *X, double *Y, int I, int J);
 void CalcLatLong(double *X, double *Y, int n, double *latit, double *longit);
 double CalcDistGeo(double *latit, double *longit, int I, int J);
 
-void readData(const char *filepath, int *Dimension, double ***Mdist)
+void readData(char **argv, int *Dimension, double ***Mdist)
 {
 
     int N;
     string arquivo, ewt;
 
     char *instancia;
+    instancia = argv[1];
 
-    ifstream in(filepath, ios::in);
+    ifstream in(instancia, ios::in);
 
     if (!in)
     {

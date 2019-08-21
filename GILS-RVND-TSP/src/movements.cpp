@@ -1,4 +1,5 @@
 #include "movements.h"
+#include "utils.h"
 
 struct melhor_movimento
 {
@@ -150,15 +151,9 @@ std::vector<int> sub_reinsertion(std::vector<int> s, double f_s, double **c)
     melhor_movimento mv_sub;
     mv_sub.f_s = f_s;
 
-    // Geracao de numeros randomicos baseados na distribuicao uniforme <int>
-    std::random_device rseed;
-    std::mt19937 rgen(rseed());
-    std::uniform_int_distribution<int> idist(0, 2); // intervalo [0,2] <int>
-
-    int sub_size = idist(rgen);
-    // 0 - Reinsertion
-    // 1 - Or-opt-2
-    // 2 - Or-opt-3
+    int sub_size = getRandInt(0, 2); // 0 - Reinsertion
+                                     // 1 - Or-opt-2
+                                     // 2 - Or-opt-3
 
     for (int i = 1; i < N - 2 - sub_size; i++)
     {
