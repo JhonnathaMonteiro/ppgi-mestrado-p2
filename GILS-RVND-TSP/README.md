@@ -43,4 +43,4 @@ Jhonnatha de Andrade Monteiro
 
 ## Referências
 
-* [A simple and effective metaheuristic for the Minimum Latency Problem](https://www.sciencedirect.com/science/article/abs/pii/S037722171200269X)
+* [1 - A simple and effective metaheuristic for the Minimum Latency Problem](https://www.sciencedirect.com/science/article/abs/pii/S037722171200269X)
