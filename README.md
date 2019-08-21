@@ -1,2 +1,7 @@
-Projetos desenvolvidos durante o segundo periodo do mestrado em Informática 
-PPGI - UFPB - 2019
+# Projetos
+
+* [GILS-RVND-TSP](https://github.com/JhonnathaMonteiro/ppgi-mestrado-p2/tree/master/GILS-RVND-TSP)
+
+## Autor
+
+Jhonnatha de Andrade Monteiro
