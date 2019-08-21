@@ -8,7 +8,7 @@ Implementação da meta-heurística GILS-RVND para resolução do problema do
 caixeiro viajante.
 
 ## Introdução
----TODO---
+------
 
 ### Dependencias
 
