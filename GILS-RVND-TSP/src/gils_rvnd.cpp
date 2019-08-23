@@ -134,7 +134,15 @@ std::vector<int> pertub(std::vector<int> s)
     int N = s.size(); // |V|
     int n = N / 2;    // metade do vetor solucao
 
-    int subSize = getRandInt(2, (N - 1) / 10); // Tamanho da subsequencia
+    int subSize;
+    if (N > 20)
+    {
+        subSize = getRandInt(2, (N - 1) / 10); // Tamanho da subsequencia
+    }
+    else
+    {
+        subSize = 2;
+    }
 
     int i = getRandInt(1, n);
     int j = getRandInt(n + subSize, N - (1 + subSize));
