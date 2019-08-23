@@ -26,14 +26,14 @@ std::vector<int> gils_rvnd(int Imax, int Iils, int dimension, double **c)
     // s_ <-- s
     int iterILS;
 
-    // f <-- infinito
+    // f* = f_
+    // f* <-- infinito
     double f_ = std::numeric_limits<double>::max();
+
+    std::uniform_real_distribution<double> R(0.0, 0.25); // [0.0, 1.0] <double>
 
     for (int i = 0; i < Imax; i++)
     {
-
-        std::uniform_real_distribution<double> R(0.0, 1.0); // [0.0, 1.0] <double>
-
         // Escolher randomicamente um valor alpha no range [0,1] em R
         // alpha <-- randon value of R
         double alpha = R(rgen);
@@ -59,6 +59,7 @@ std::vector<int> gils_rvnd(int Imax, int Iils, int dimension, double **c)
             }
 
             // s <-- pertub(s')
+
             s = pertub(s_);
             iterILS++;
         }
@@ -124,10 +125,24 @@ std::vector<int> rvnd(std::vector<int> s, double **c)
 
 std::vector<int> pertub(std::vector<int> s)
 {
+    /**
+     * Double-bridge: pode ser pensada como a troca entre duas subsequências. \
+     * Precisamente, é recomendado utilizar subsequencias de interseção nula, 
+     * geradas aleatoriamente, cujos tamanhos variam entre 2 e |V| / 10
+     */
 
-    // Utilizando shuffle para gerar os distrubios em s
-    auto rng = std::default_random_engine{};
-    std::shuffle(s.begin() + 1, s.end() - 1, rng);
+    int N = s.size(); // |V|
+    int n = N / 2;    // metade do vetor solucao
+
+    int subSize = getRandInt(2, (N - 1) / 10); // Tamanho da subsequencia
+
+    int i = getRandInt(1, n);
+    int j = getRandInt(n + subSize, N - (1 + subSize));
+
+    for (int f = 0; f < subSize; f++)
+    {
+        std::swap(s[i + f], s[j + f]);
+    }
 
     return s;
 }

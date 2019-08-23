@@ -12,10 +12,6 @@ int dimension;      // quantidade total de vertices
 int main(int argc, char **argv)
 {
 
-    // filepath para instancia teste gr17
-    // const char *filepath = "../instances/gr17.tsp";
-    // const char *filepath = "../instances/pr226.tsp";
-
     // Ler instancia
     readData(argc, argv, &dimension, &matrizAdj);
 
