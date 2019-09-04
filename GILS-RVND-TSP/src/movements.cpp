@@ -137,16 +137,16 @@ std::vector<int> two_opt(std::vector<int> s, double f_s, double **c)
  * @param **c matriz de adjacencia
  * @return s vetor solucao (melhor vizinho)
 */
-std::vector<int> sub_reinsertion(std::vector<int> s, double f_s, double **c)
+std::vector<int> sub_reinsertion(std::vector<int> s, double f_s, int sub_size, double **c)
 {
     int N = s.size(); // Tamanho do vetor solucao
     int _f_s;
     melhor_movimento mv_sub;
     mv_sub.f_s = f_s;
 
-    int sub_size = getRandInt(0, 2); // 0 - Reinsertion
-                                     // 1 - Or-opt-2
-                                     // 2 - Or-opt-3
+    // int sub_size = getRandInt(0, 2); // 0 - Reinsertion
+    //                                  // 1 - Or-opt-2
+    //                                  // 2 - Or-opt-3
 
     for (int i = 1; i < N - 2 - sub_size; i++)
     {

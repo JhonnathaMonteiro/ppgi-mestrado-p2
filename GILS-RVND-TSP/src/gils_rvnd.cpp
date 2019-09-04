@@ -30,6 +30,7 @@ std::vector<int> gils_rvnd(int Imax, int Iils, int dimension, double **c)
     // f* <-- infinito
     double f_ = std::numeric_limits<double>::max();
 
+    // std::uniform_real_distribution<double> R(0.0, 0.25); // [0.0, 1.0] <double>
     std::uniform_real_distribution<double> R(0.0, 0.25); // [0.0, 1.0] <double>
 
     for (int i = 0; i < Imax; i++)
@@ -59,7 +60,6 @@ std::vector<int> gils_rvnd(int Imax, int Iils, int dimension, double **c)
             }
 
             // s <-- pertub(s')
-
             s = pertub(s_);
             iterILS++;
         }
@@ -82,7 +82,7 @@ std::vector<int> rvnd(std::vector<int> s, double **c)
     // 1 - 2-opt
     // 2 - swap
     // 3 - sub_reinsertion
-    std::vector<int> NL = {1, 2, 3};
+    std::vector<int> NL = {1, 2, 3, 4, 5};
 
     while (NL.size() > 0)
     {
@@ -101,7 +101,13 @@ std::vector<int> rvnd(std::vector<int> s, double **c)
             s_ = swap(s, f_s, c);
             break;
         case 3:
-            s_ = sub_reinsertion(s, f_s, c);
+            s_ = sub_reinsertion(s, f_s, 1, c);
+            break;
+        case 4:
+            s_ = sub_reinsertion(s, f_s, 2, c);
+            break;
+        case 5:
+            s_ = sub_reinsertion(s, f_s, 3, c);
             break;
         default:
             break;
@@ -113,6 +119,13 @@ std::vector<int> rvnd(std::vector<int> s, double **c)
         {
             s = s_;
             f_s = _f_s;
+            NL = {
+                1,
+                2,
+                3,
+                4,
+                5,
+            }; // Update NL
         }
         else
         {
@@ -147,10 +160,12 @@ std::vector<int> pertub(std::vector<int> s)
     int i = getRandInt(1, n);
     int j = getRandInt(n + subSize, N - (1 + subSize));
 
-    for (int f = 0; f < subSize; f++)
+    for (int f = 0; f < subSize; ++f)
     {
         std::swap(s[i + f], s[j + f]);
     }
+    // unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    // std::shuffle(s.begin() + 1, s.end() - 1, std::default_random_engine(seed));
 
     return s;
 }

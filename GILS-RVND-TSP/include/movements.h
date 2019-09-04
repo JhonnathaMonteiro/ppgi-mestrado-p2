@@ -4,5 +4,6 @@
 
 std::vector<int> two_opt(std::vector<int>, double, double **);
 std::vector<int> swap(std::vector<int>, double, double **);
-std::vector<int> sub_reinsertion(std::vector<int>, double, double **);
+// std::vector<int> sub_reinsertion(std::vector<int>, double, double **);
+std::vector<int> sub_reinsertion(std::vector<int>, double, int, double **);
 #endif // MOVEMENTS_H_INCLUDED
