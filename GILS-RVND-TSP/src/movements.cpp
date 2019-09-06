@@ -137,30 +137,139 @@ std::vector<int> two_opt(std::vector<int> s, double f_s, double **c)
  * @param **c matriz de adjacencia
  * @return s vetor solucao (melhor vizinho)
 */
-std::vector<int> sub_reinsertion(std::vector<int> s, double f_s, int sub_size, double **c)
+std::vector<int> reinsertion(std::vector<int> s, double f_s, double **c)
 {
     int N = s.size(); // Tamanho do vetor solucao
     int _f_s;
     melhor_movimento mv_sub;
     mv_sub.f_s = f_s;
 
-    // int sub_size = getRandInt(0, 2); // 0 - Reinsertion
-    //                                  // 1 - Or-opt-2
-    //                                  // 2 - Or-opt-3
-
-    for (int i = 1; i < N - 2 - sub_size; i++)
+    for (int i = 0; i < N - 3; i++)
     {
-        for (int j = i + 1 + sub_size; j < N - 1; j++)
+        for (int j = i + 2; j < N - 1; j++)
         {
             _f_s = f_s; // Valor da solucao a ser avaliada
 
-            _f_s = _f_s - c[s[i - 1]][s[i]];        // Primeira quebra
-            _f_s = _f_s - c[s[i + sub_size]][s[j]]; // Segunda quebra
-            _f_s = _f_s - c[s[j]][s[j + 1]];        // Terceira quebra
+            _f_s = _f_s - c[s[i]][s[i + 1]]; // Primeira quebra
+            _f_s = _f_s - c[s[j - 1]][s[j]]; // Segunda quebra
+            _f_s = _f_s - c[s[j]][s[j + 1]]; // Terceira quebra
 
-            _f_s = _f_s + c[s[i - 1]][s[j]];            // Primeira adicao
-            _f_s = _f_s + c[s[j]][s[i]];                // Segunda adicao
-            _f_s = _f_s + c[s[i + sub_size]][s[j + 1]]; // Terceira adicao
+            _f_s = _f_s + c[s[i]][s[j]];         // Primeira adicao
+            _f_s = _f_s + c[s[j]][s[i + 1]];     // Segunda adicao
+            _f_s = _f_s + c[s[j - 1]][s[j + 1]]; // Terceira adicao
+
+            // Checar melhora
+            if (_f_s < mv_sub.f_s)
+            {
+                // Atualizar melhor movimento
+                mv_sub.f_s = _f_s;
+                mv_sub.i = i;
+                mv_sub.j = j;
+            }
+        }
+    }
+
+    // Se nao teve melhoria
+    if (mv_sub.i == mv_sub.j)
+    {
+        return s;
+    }
+    // Se teve melhoria
+    else
+    {
+        // Construindo s
+        s.insert(s.begin() + 1 + mv_sub.i, s[mv_sub.j]);
+        s.erase(s.begin() + mv_sub.j + 1);
+
+        return s;
+    }
+}
+
+/**
+ * Realiza o movimeto de Or-opt-2 na solucao s 
+ * e retorna o melhor vizinho
+ * 
+ * @param s vetor solucao de entrada
+ * @param **c matriz de adjacencia
+ * @return s vetor solucao (melhor vizinho)
+*/
+std::vector<int> or_2opt(std::vector<int> s, double f_s, double **c)
+{
+    int N = s.size(); // Tamanho do vetor solucao
+    int _f_s;
+    melhor_movimento mv_sub;
+    mv_sub.f_s = f_s;
+
+    for (int i = 1; i < N - 2 - 1; i++)
+    {
+        for (int j = i + 1; j < N - 1; j++)
+        {
+            _f_s = f_s; // Valor da solucao a ser avaliada
+
+            _f_s = _f_s - c[s[i - 1]][s[i]]; // Primeira quebra
+            _f_s = _f_s - c[s[i + 1]][s[j]]; // Segunda quebra
+            _f_s = _f_s - c[s[j]][s[j + 1]]; // Terceira quebra
+
+            _f_s = _f_s + c[s[i - 1]][s[j]];     // Primeira adicao
+            _f_s = _f_s + c[s[j]][s[i]];         // Segunda adicao
+            _f_s = _f_s + c[s[i + 1]][s[j + 1]]; // Terceira adicao
+
+            // Checar melhora
+            if (_f_s < mv_sub.f_s)
+            {
+                // Atualizar melhor movimento
+                mv_sub.f_s = _f_s;
+                mv_sub.i = i;
+                mv_sub.j = j;
+            }
+        }
+    }
+
+    // Se nao teve melhoria
+    if (mv_sub.i == mv_sub.j)
+    {
+        return s;
+    }
+    // Se teve melhoria
+    else
+    {
+        // Construindo s
+        std::rotate(s.begin() + mv_sub.i,
+                    s.begin() + mv_sub.j,
+                    s.begin() + mv_sub.j + 1);
+
+        return s;
+    }
+}
+
+/**
+ * Realiza o movimeto de Or-opt-3  na solucao s 
+ * e retorna o melhor vizinho
+ * 
+ * @param s vetor solucao de entrada
+ * @param **c matriz de adjacencia
+ * @return s vetor solucao (melhor vizinho)
+*/
+std::vector<int> or_3opt(std::vector<int> s, double f_s, double **c)
+{
+    int N = s.size(); // Tamanho do vetor solucao
+    int _f_s;
+    melhor_movimento mv_sub;
+    mv_sub.f_s = f_s;
+
+    for (int i = 1; i < N - 2 - 2; i++)
+    {
+        for (int j = i + 1 + 2; j < N - 1; j++)
+        {
+            _f_s = f_s; // Valor da solucao a ser avaliada
+
+            _f_s = _f_s - c[s[i - 1]][s[i]]; // Primeira quebra
+            _f_s = _f_s - c[s[i + 2]][s[j]]; // Segunda quebra
+            _f_s = _f_s - c[s[j]][s[j + 1]]; // Terceira quebra
+
+            _f_s = _f_s + c[s[i - 1]][s[j]];     // Primeira adicao
+            _f_s = _f_s + c[s[j]][s[i]];         // Segunda adicao
+            _f_s = _f_s + c[s[i + 2]][s[j + 1]]; // Terceira adicao
 
             // Checar melhora
             if (_f_s < mv_sub.f_s)

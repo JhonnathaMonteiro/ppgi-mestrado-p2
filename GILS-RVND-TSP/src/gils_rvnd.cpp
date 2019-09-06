@@ -76,6 +76,7 @@ std::vector<int> gils_rvnd(int Imax, int Iils, int dimension, double **c)
 
 std::vector<int> rvnd(std::vector<int> s, double **c)
 {
+
     std::vector<int> s_;
 
     // Inicializar estruturas de vizinhaca:
@@ -101,13 +102,13 @@ std::vector<int> rvnd(std::vector<int> s, double **c)
             s_ = swap(s, f_s, c);
             break;
         case 3:
-            s_ = sub_reinsertion(s, f_s, 1, c);
+            s_ = reinsertion(s, f_s, c);
             break;
         case 4:
-            s_ = sub_reinsertion(s, f_s, 2, c);
+            s_ = or_2opt(s, f_s, c);
             break;
         case 5:
-            s_ = sub_reinsertion(s, f_s, 3, c);
+            s_ = or_3opt(s, f_s, c);
             break;
         default:
             break;
