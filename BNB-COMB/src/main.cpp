@@ -4,7 +4,7 @@
 #include <list>
 #include <numeric>
 #include <algorithm>
-#include <limits.h>
+#include <math.h>
 using namespace std;
 
 #include "data.h"
