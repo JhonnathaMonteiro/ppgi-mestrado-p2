@@ -28,7 +28,7 @@
 #include "hungarian.h"
 #include "data.h"
 
-#define INF (0x7FFFFFFF)
+#define INF 99999999
 #define verbose (0)
 
 #define hungarian_test_alloc(X)                                                                         \
