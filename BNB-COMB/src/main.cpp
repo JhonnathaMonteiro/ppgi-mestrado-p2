@@ -10,7 +10,7 @@
 
 int main(int argc, char **argv)
 {
-    //leitura da instancia
+    //leitura da instancia para o bnb
     Data *data = new Data(argc, argv[1]);
     data->readData();
 
@@ -33,8 +33,13 @@ int main(int argc, char **argv)
 
     arvore.push_back(raiz);
 
+    // Uper_bound para instancia burma14.tsp
+    // deve ser modificado para outras instancias
+    // TODO: Gerar upper_bound com GILS-RVND-TSP
+    double upper_bound = 3323;
+
     //branch and bound
-    Node solucao = bnbComb(arvore, data, data->getDimension());
+    Node solucao = bnbComb(arvore, data, data->getDimension(), upper_bound);
 
     //tour size
     std::cout << "Solucao: " << solucao.lower_bound << std::endl;

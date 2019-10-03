@@ -22,50 +22,6 @@ void calcularSolucao(Node &node, double **cost, int dim)
             cost[arco.first][arco.second] = INFINITE;
         }
     }
-    if (!node.arcos_obrigatorios.empty())
-    {
-        double valorExtra = 0; //valor a ser adicionado na solucao do subproblema
-        //linhas e colunas excluidas no subproblema
-        std::vector<int> linhasExcluidas;
-        std::vector<int> colunasExcluidas;
-
-        std::vector<int> new_rows(dim);
-        std::vector<int> new_cols(dim);
-        std::iota(new_rows.begin(), new_rows.begin() + dim, 0);
-        std::iota(new_cols.begin(), new_cols.begin() + dim, 0);
-
-        //resolver uma subproblema menor, onde o arco eh obrigatorio
-        for (auto &arco : node.arcos_obrigatorios)
-        {
-
-            //atualizando os valores de new_rowls e new_cols
-            _eraseByValue(new_rows, arco.first);
-            _eraseByValue(new_cols, arco.second);
-            valorExtra += cost[arco.first][arco.second];
-        }
-
-        //Mapeando os vetores com a nova matriz de custo
-        double **new_cost = new double *[new_rows.size()];
-        for (int i = 0; i < new_rows.size(); i++)
-        {
-
-            new_cost[i] = new double[new_rows.size()];
-            for (int j = 0; j < new_rows.size(); j++)
-            {
-                new_cost[i][j] = cost[new_rows[i]][new_cols[j]];
-            }
-        }
-
-        //nova matriz de custo
-        for (int i = 0; i < dim; i++)
-        {
-            delete[] cost[i];
-        }
-        delete[] cost;
-
-        double **cost = new double *[new_cols.size()];
-        cost = new_cost;
-    }
 
     hungarian_problem_t p;
     int mode = HUNGARIAN_MODE_MINIMIZE_COST;
@@ -80,9 +36,9 @@ void calcularSolucao(Node &node, double **cost, int dim)
     //escolhendo o subtour
     //criterio: menor quantidade de nos (empate: menor indice)
     int tamanho = __INT_MAX__; // escolha inicial (inf)
-    for (int i = 0; i < node.subtour.size(); i++)
+    for (int i = 0; i < (int)node.subtour.size(); i++)
     {
-        if (node.subtour[i].size() < tamanho)
+        if ((int)node.subtour[i].size() < tamanho)
         {
             tamanho = node.subtour[i].size();
             node.escolhido = i;
@@ -100,76 +56,90 @@ void calcularSolucao(Node &node, double **cost, int dim)
 /*
 * Branch and bound combinatorio
 */
-Node bnbComb(std::list<Node> arvore, Data *data, int dim)
+Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound)
 {
+
     //inicializando a solucao
     Node bestNode;
+    bool otimo = false;
     bestNode.lower_bound = INFINITE;
     Node currentNode;
 
     // Busca em largura
     while (!arvore.empty())
     {
-        currentNode = arvore.front();
-
-        //verificar se eh candidato a solucao (podar)
-        if (currentNode.podar)
+        //verificar solucao otima
+        if (otimo)
         {
-            if (currentNode.lower_bound < bestNode.lower_bound)
+            break;
+        }
+
+        //selecionando o no que sera analisado
+        //criterio: no com o menor LB
+        double menorLB = INFINITE;
+        std::list<Node>::iterator currPos; //posicao do no atual na arvore
+        std::list<Node>::iterator it;      //iterador
+        for (it = arvore.begin(); it != arvore.end(); ++it)
+        {
+            if (it->lower_bound < menorLB)
             {
-                //atualizar o melhor node
-                bestNode = currentNode;
+                menorLB = it->lower_bound;
+                currPos = it;
+                currentNode = *it;
             }
         }
-        // caso contrario gerar nos (branch)
-        else
+
+        //matriz de custo
+        // TODO: Retirar isso de dentro da funcao
+        double **cost = new double *[dim];
+        for (int i = 0; i < dim; i++)
         {
-            //matriz de custo
-            // TODO: Retirar isso de dentro da funcao
-            double **cost = new double *[dim];
-            for (int i = 0; i < dim; i++)
+            cost[i] = new double[dim];
+            for (int j = 0; j < dim; j++)
             {
-                cost[i] = new double[dim];
-                for (int j = 0; j < dim; j++)
+                cost[i][j] = data->getDistance(i, j);
+            }
+        }
+
+        int escolhidoSize = currentNode.subtour[currentNode.escolhido].size();
+
+        //iterar por todos os arcos do subtour escolhido
+        for (int i = 0; i < escolhidoSize - 1; i++)
+        {
+
+            std::pair<int, int> arco;
+            arco.first = currentNode.subtour[currentNode.escolhido][i];
+            arco.second = currentNode.subtour[currentNode.escolhido][i + 1];
+
+            // proibindo o arco
+            Node N1;
+            N1.arcos_proibidos = currentNode.arcos_proibidos;
+            N1.arcos_proibidos.push_back(arco);
+            calcularSolucao(N1, cost, dim);
+
+            if (N1.podar)
+            {
+                if (N1.lower_bound < bestNode.lower_bound)
                 {
-                    cost[i][j] = data->getDistance(i, j);
+                    //atualizar o melhor node
+                    bestNode = N1;
+
+                    if (bestNode.lower_bound == upper_bound)
+                    {
+                        otimo = true;
+                        break;
+                    }
                 }
             }
 
-            int escolhidoSize = currentNode.subtour[currentNode.escolhido].size();
-
-            //iterar por todos os arcos do subtour escolhido
-            //TODO: utilizar held_karp
-            for (int i = 0; i < escolhidoSize - 2; i++)
+            // valores maiores que o upper_bound nao devem ser explorados
+            if (N1.lower_bound < upper_bound)
             {
-
-                std::pair<int, int> arco;
-                arco.first = currentNode.subtour[currentNode.escolhido][i];
-                arco.second = currentNode.subtour[currentNode.escolhido][i + 1];
-
-                // Arco excluido
-                Node N1;
-                N1.arcos_proibidos = currentNode.arcos_proibidos;
-                N1.arcos_obrigatorios = currentNode.arcos_obrigatorios;
-                N1.arcos_proibidos.push_back(arco);
-                calcularSolucao(N1, cost, dim);
-
-                // Arco incluso
-                Node N2;
-                N2.arcos_proibidos = currentNode.arcos_proibidos;
-                N2.arcos_obrigatorios = currentNode.arcos_obrigatorios;
-                N2.arcos_obrigatorios.push_back(arco);
-                calcularSolucao(N2, cost, dim);
-
-                //inserir novos nos na arvore
                 arvore.push_back(N1);
-                arvore.push_back(N2);
             }
         }
-
-        //remover o pai
-        arvore.pop_front();
+        //remover o no atual
+        arvore.erase(currPos);
     }
-
     return bestNode;
 }

@@ -165,8 +165,6 @@ std::vector<int> pertub(std::vector<int> s)
     {
         std::swap(s[i + f], s[j + f]);
     }
-    // unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    // std::shuffle(s.begin() + 1, s.end() - 1, std::default_random_engine(seed));
 
     return s;
 }
