@@ -40,8 +40,8 @@ int main(int argc, char **argv)
 
     //branch and bound
     // int busca = BUSCA_BEST_BOUND;
-    int busca = BUSCA_EM_LARGURA;
-    // int busca = BUSCA_EM_PROFUNDIDADE;
+    // int busca = BUSCA_EM_LARGURA;
+    int busca = BUSCA_EM_PROFUNDIDADE;
     Node solucao = bnbComb(arvore, data, data->getDimension(), upper_bound, busca);
 
     //tour size

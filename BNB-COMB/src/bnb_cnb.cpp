@@ -140,7 +140,7 @@ Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, in
             N1.arcos_proibidos.push_back(arco);
             calcularSolucao(N1, cost, dim);
 
-            if (N1.podar)
+            if (N1.podar) //encontrou um upper bound
             {
                 if (N1.lower_bound < bestNode.lower_bound)
                 {
@@ -151,6 +151,16 @@ Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, in
                     {
                         otimo = true;
                         break;
+                    }
+                }
+
+                // examina se e possivel pode podar alguns nós por limite da arvore
+                for (it = arvore.begin(); it != arvore.end(); ++it)
+                {
+                    if (it->lower_bound > N1.lower_bound)
+                    {
+                        //remover no
+                        arvore.erase(it);
                     }
                 }
             }
