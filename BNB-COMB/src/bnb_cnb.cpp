@@ -56,7 +56,7 @@ void calcularSolucao(Node &node, double **cost, int dim)
 /*
 * Branch and bound combinatorio
 */
-Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound)
+Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, int busca)
 {
 
     //inicializando a solucao
@@ -79,14 +79,37 @@ Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound)
         double menorLB = INFINITE;
         std::list<Node>::iterator currPos; //posicao do no atual na arvore
         std::list<Node>::iterator it;      //iterador
-        for (it = arvore.begin(); it != arvore.end(); ++it)
+
+        switch (busca)
         {
-            if (it->lower_bound < menorLB)
+        case BUSCA_BEST_BOUND:
+            for (it = arvore.begin(); it != arvore.end(); ++it)
             {
-                menorLB = it->lower_bound;
-                currPos = it;
-                currentNode = *it;
+                if (it->lower_bound < menorLB)
+                {
+                    menorLB = it->lower_bound;
+                    currPos = it;
+                    currentNode = *it;
+                }
             }
+            break;
+
+        case BUSCA_EM_PROFUNDIDADE:
+            //Pegar o no mais profundo na arvore
+            it = --arvore.end(); //-- para o iterador ficar na posicao do ultimo
+            currPos = it;
+            currentNode = *it;
+            break;
+
+        case BUSCA_EM_LARGURA:
+            //Pegar o no mais profundo na arvore
+            it = arvore.begin();
+            currPos = it;
+            currentNode = *it;
+            break;
+
+        default:
+            break;
         }
 
         //matriz de custo

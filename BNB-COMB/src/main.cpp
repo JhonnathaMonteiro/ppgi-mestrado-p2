@@ -39,7 +39,10 @@ int main(int argc, char **argv)
     double upper_bound = 3323;
 
     //branch and bound
-    Node solucao = bnbComb(arvore, data, data->getDimension(), upper_bound);
+    // int busca = BUSCA_BEST_BOUND;
+    int busca = BUSCA_EM_LARGURA;
+    // int busca = BUSCA_EM_PROFUNDIDADE;
+    Node solucao = bnbComb(arvore, data, data->getDimension(), upper_bound, busca);
 
     //tour size
     std::cout << "Solucao: " << solucao.lower_bound << std::endl;

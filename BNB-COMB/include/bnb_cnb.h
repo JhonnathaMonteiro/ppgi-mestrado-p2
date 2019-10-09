@@ -1,5 +1,11 @@
 #ifndef BNB_CNB_H_INCLUDED
 #define BNB_CNB_H_INCLUDED
+
+//Metodos de busca
+#define BUSCA_EM_PROFUNDIDADE 0
+#define BUSCA_EM_LARGURA 1
+#define BUSCA_BEST_BOUND 2
+
 #include <vector>
 #include <list>
 #include <utility>
@@ -20,6 +26,6 @@ typedef struct node
 } Node;
 
 void calcularSolucao(Node &, double **, int);
-Node bnbComb(std::list<Node>, Data *, int, double);
+Node bnbComb(std::list<Node>, Data *, int, double, int);
 
 #endif // BNB_CNB_H_INCLUDED
