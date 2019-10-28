@@ -102,7 +102,7 @@ Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, in
             break;
 
         case BUSCA_EM_LARGURA:
-            //Pegar o no mais profundo na arvore
+            //Pegar o primeiro no da arvore
             it = arvore.begin();
             currPos = it;
             currentNode = *it;
