@@ -3,49 +3,57 @@
 #include <list>
 #include <numeric>
 #include <algorithm>
-
 #include <data.h>
-#include "hungarian.h"
+
 #include "bnb_cnb.h"
+#include "sub_gradient.h"
 
 int main(int argc, char **argv)
 {
     //leitura da instancia para o bnb
     Data *data = new Data(argc, argv[1]);
     data->readData();
+    int dim = data->getDimension();
 
-    double **cost = new double *[data->getDimension()];
-    for (int i = 0; i < data->getDimension(); i++)
+    //convertendo para uma matriz (double **)
+    double **cost = new double *[dim];
+    for (int i = 0; i < dim; i++)
     {
-        cost[i] = new double[data->getDimension()];
-        for (int j = 0; j < data->getDimension(); j++)
+        cost[i] = new double[dim];
+        for (int j = 0; j < dim; j++)
         {
             cost[i][j] = data->getDistance(i, j);
         }
     }
 
-    //criacao da arvore de busca
-    std::list<Node> arvore;
-
-    //resolvendo o no raiz
-    Node raiz;
-    calcularSolucao(raiz, cost, data->getDimension());
-
-    arvore.push_back(raiz);
-
-    // Uper_bound para instancia burma14.tsp
-    // deve ser modificado para outras instancias
     // TODO: Gerar upper_bound com GILS-RVND-TSP
-    double upper_bound = 3323;
+    // double UB = 426; //eil51.tsp
+    double UB = 429; //eil51.tsp
+    // double UB = 460; //eil51.tsp
+
+    // double UB = 3323; //burma14.tsp
+    // double UB = 3500; //burma14.tsp
+
+    // double UB = 29368; //kroA200.tsp
+    // double UB = 29368; //kroA200.tsp
+
+    // double UB = 118282; //bier127.tsp
+    // double UB = 119000; //bier127.tsp
 
     //branch and bound
     // int busca = BUSCA_BEST_BOUND;
-    // int busca = BUSCA_EM_LARGURA;
-    int busca = BUSCA_EM_PROFUNDIDADE;
-    Node solucao = bnbComb(arvore, data, data->getDimension(), upper_bound, busca);
+    int busca = BUSCA_EM_LARGURA;
+    // int busca = BUSCA_EM_PROFUNDIDADE;
+    Node solucao = bnbComb(cost, dim, UB, busca);
 
-    //tour size
-    std::cout << "Solucao: " << solucao.lower_bound << std::endl;
+    //free memory
+    for (int i = 0; i < dim; ++i)
+    {
+        delete[] cost[i];
+    }
+
+    //solucao
+    std::cout << "Solucao: " << solucao.LB << std::endl;
 
     return 0;
 }

@@ -1,7 +1,6 @@
 #include "bnb_cnb.h"
-#include "hungarian.h"
-#include "mtx_conv.h"
 #include "data.h"
+#include "sub_gradient.h"
 
 void _eraseByValue(std::vector<int> &vec, int val)
 {
@@ -11,7 +10,7 @@ void _eraseByValue(std::vector<int> &vec, int val)
 /*
 * Funcao para calcular a solucao do node e atualiza sua estrutura
 */
-void calcularSolucao(Node &node, double **cost, int dim)
+void calcularSolucao(Node &node, double **cost, int dim, double UB)
 {
 
     //verificar arcos proibidos/obrigatorios e modificar a matriz de custo de acordo
@@ -23,59 +22,39 @@ void calcularSolucao(Node &node, double **cost, int dim)
         }
     }
 
-    hungarian_problem_t p;
-    int mode = HUNGARIAN_MODE_MINIMIZE_COST;
-    hungarian_init(&p, cost, dim, dim, mode); // Carregando o problema
-
-    //resolvendo o no
-    node.lower_bound = hungarian_solve(&p); //lower bound
-
-    //gerando os subtours a partir da matriz solucao (A) do alg. hungaro
-    node.subtour = subConstructor(p);
-
-    //escolhendo o subtour
-    //criterio: menor quantidade de nos (empate: menor indice)
-    int tamanho = __INT_MAX__; // escolha inicial (inf)
-    for (int i = 0; i < (int)node.subtour.size(); i++)
-    {
-        if ((int)node.subtour[i].size() < tamanho)
-        {
-            tamanho = node.subtour[i].size();
-            node.escolhido = i;
-        }
-    }
-
-    //verificar se a solucao e viavel
-    if (node.subtour.size() == 1)
-    {
-        //solucao viavel
-        node.podar = true;
-    }
+    subgrad_method(node, cost, dim, node.multiplicadores, UB, 2); // rho = 2
 }
 
 /*
 * Branch and bound combinatorio
 */
-Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, int busca)
+Node bnbComb(double **cost, int dim, double heuristic_UB, int busca)
 {
+    //raiz
+    Node root_node;
+
+    // multiplicadores da no raiz {0, ... , 0}
+    std::vector<double> u(dim);
+    std::fill(std::begin(u), std::end(u), 0);
+    root_node.multiplicadores = u;
+
+    //inicializando arvore
+    std::list<Node> arvore;
+
+    //resolvendo a raiz
+    // void calcularSolucao(Node &node, double **cost, int dim, double UB)
+    calcularSolucao(root_node, cost, dim, heuristic_UB);
+
+    arvore.push_back(root_node);
 
     //inicializando a solucao
-    Node bestNode;
-    bool otimo = false;
-    bestNode.lower_bound = INFINITE;
-    Node currentNode;
+    Node bestNode, currentNode;
+    bestNode.LB = heuristic_UB;
 
-    // Busca em largura
     while (!arvore.empty())
     {
-        //verificar solucao otima
-        if (otimo)
-        {
-            break;
-        }
 
-        //selecionando o no que sera analisado
-        //criterio: no com o menor LB
+        //metodo de busca
         double menorLB = INFINITE;
         std::list<Node>::iterator currPos; //posicao do no atual na arvore
         std::list<Node>::iterator it;      //iterador
@@ -85,9 +64,9 @@ Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, in
         case BUSCA_BEST_BOUND:
             for (it = arvore.begin(); it != arvore.end(); ++it)
             {
-                if (it->lower_bound < menorLB)
+                if (it->LB < menorLB)
                 {
-                    menorLB = it->lower_bound;
+                    menorLB = it->LB;
                     currPos = it;
                     currentNode = *it;
                 }
@@ -112,64 +91,69 @@ Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, in
             break;
         }
 
-        //matriz de custo
-        // TODO: Retirar isso de dentro da funcao
-        double **cost = new double *[dim];
-        for (int i = 0; i < dim; i++)
+        // Verificar se o no atingiu a solucao otima
+        if (currentNode.otimo)
         {
-            cost[i] = new double[dim];
-            for (int j = 0; j < dim; j++)
-            {
-                cost[i][j] = data->getDistance(i, j);
-            }
+            bestNode = currentNode;
+            break;
         }
 
-        int escolhidoSize = currentNode.subtour[currentNode.escolhido].size();
-
-        //iterar por todos os arcos do subtour escolhido
-        for (int i = 0; i < escolhidoSize - 1; i++)
+        if (!currentNode.is_upper_bound)
         {
 
-            std::pair<int, int> arco;
-            arco.first = currentNode.subtour[currentNode.escolhido][i];
-            arco.second = currentNode.subtour[currentNode.escolhido][i + 1];
-
-            // proibindo o arco
-            Node N1;
-            N1.arcos_proibidos = currentNode.arcos_proibidos;
-            N1.arcos_proibidos.push_back(arco);
-            calcularSolucao(N1, cost, dim);
-
-            if (N1.podar) //encontrou um upper bound
+            // Determinar os arcos proibidos
+            std::vector<pair<int, int>> arcos_p;
+            for (auto &edge : currentNode.one_tree)
             {
-                if (N1.lower_bound < bestNode.lower_bound)
+                if (edge.first == currentNode.maior_grau_i || edge.second == currentNode.maior_grau_i)
                 {
-                    //atualizar o melhor node
-                    bestNode = N1;
-
-                    if (bestNode.lower_bound == upper_bound)
-                    {
-                        otimo = true;
-                        break;
-                    }
-                }
-
-                // examina se e possivel pode podar alguns nós por limite da arvore
-                for (it = arvore.begin(); it != arvore.end(); ++it)
-                {
-                    if (it->lower_bound > N1.lower_bound)
-                    {
-                        //remover no
-                        arvore.erase(it);
-                    }
+                    arcos_p.push_back(edge);
                 }
             }
 
-            // valores maiores que o upper_bound nao devem ser explorados
-            if (N1.lower_bound < upper_bound)
+            // Iterando pelos arcos_p e branching
+            for (auto &arco : arcos_p)
             {
-                arvore.push_back(N1);
+                // criando node filho
+                Node N1;
+                N1.arcos_proibidos = currentNode.arcos_proibidos; //herda os arcos
+                N1.multiplicadores = currentNode.multiplicadores; //herda os multiplicadores
+                N1.arcos_proibidos.push_back(arco);
+                calcularSolucao(N1, cost, dim, bestNode.LB);
+
+                // verificando se o no deve ser adicionado na arvore
+                // valores maiores que o melhor UB (bestNode.LB)
+                // nao devem ser explorados
+                if (N1.LB <= bestNode.LB)
+                {
+                    arvore.push_back(N1);
+
+                    //verificando se foi encontrado um upper_bound (solucao viavel)
+                    if (N1.is_upper_bound)
+                    {
+
+                        // atualizando o UB
+                        bestNode = N1;
+
+                        //verificando solucao otima
+
+                        // examinar se eh possivel pode podar alguns nos por limite
+                        // da arvore
+                        for (it = arvore.begin(); it != arvore.end(); ++it)
+                        {
+                            if (it->LB > N1.LB)
+                            {
+                                //remover no
+                                arvore.erase(it);
+                            }
+                        }
+                    }
+                }
             }
+        }
+        else if (currentNode.LB < bestNode.LB)
+        {
+            bestNode = currentNode;
         }
         //remover o no atual
         arvore.erase(currPos);

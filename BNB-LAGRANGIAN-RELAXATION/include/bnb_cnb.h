@@ -16,16 +16,15 @@
 typedef struct node
 {
     std::vector<std::pair<int, int>> arcos_proibidos; // lista de arcos proibidos
-    // std::vector<std::pair<int, int>> arcos_obrigatorios; // lista de arcos obrigatorios
-    std::vector<std::vector<int>> subtour; // conjunto de subtours da solucao
-                                           // gerada pelo alg. hungaro
-    double lower_bound;                    //lower_bound produzido pelo no (ou custo total da
-                                           //solucao do algoritmo hungaro)
-    int escolhido;                         // subtour escolhido dado o criterio de selecao
-    bool podar = false;                    // variavel que diz se o no deve gerar filhos
+    std::vector<double> multiplicadores;              // multiplicadores de lagrange do no
+                                                      // solucao do algoritmo hungaro)
+    std::vector<std::pair<int, int>> one_tree;        // 1-arvore solucao modificada do kruskal
+    int maior_grau_i;                                 // indice do vertice com maior grau
+    double LB;                                        // valor da solucao
+    bool otimo = false;                               // variavel que diz se o no deve gerar filhos
+    bool is_upper_bound = false;                      // true: solucao otima = UB
 } Node;
 
-void calcularSolucao(Node &, double **, int);
-Node bnbComb(std::list<Node>, Data *, int, double, int);
+Node bnbComb(double **, int, double, int);
 
 #endif // BNB_CNB_H_INCLUDED

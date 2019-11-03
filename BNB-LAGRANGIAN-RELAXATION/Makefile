@@ -34,8 +34,17 @@ build:
 debug: CXXFLAGS += -DDEBUG -g
 debug: all
 
-release: CXXFLAGS += -O2
+release: CXXFLAGS += -O3
 release: all
+
+test_burma: release
+	./build/apps/$(TARGET) ./instances/burma14.tsp
+
+test_bier127: release
+	./build/apps/$(TARGET) ./instances/bier127.tsp
+
+test_eil51: release
+	./build/apps/$(TARGET) ./instances/eil51.tsp
 
 clean:
 	-@rm -rvf $(OBJ_DIR)/*
