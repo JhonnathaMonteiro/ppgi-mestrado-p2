@@ -42,20 +42,17 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
     int ite_fail = 0;
 
     // menor valor de rho
-    double min_rho = rho / std::pow(2, 8);
+    double min_rho = rho / std::pow(2, 32);
 
     // best lower bound
     double bestLB = 0;
 
-    // arestas da 1-arvore
-    vii one_tree_edges, best_tree;
-
-    // vertice de maior grau
-    int maior_grau_pos = 0;
+    // Arestas da 1-arvore
+    vii one_tree_edges;
 
     while (rho > min_rho) // condicao de parada 1
     {
-        // matriz de custo lagrangiana (_c)
+        // Matriz de custo lagrangiana (_c)
         std::vector<std::vector<double>> _C(dim, std::vector<double>(dim));
         for (int i = 0; i < dim; ++i)
         {
@@ -76,7 +73,10 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
         kruskal.mst_to_oneTree();            // menor isercao do vertice 0
         one_tree_edges = kruskal.getEdges(); // arestas da one-tree
 
-        // subgradiente
+        // Lower Bound
+        double LB = kruskal.cost;
+
+        // Subgradiente
         std::vector<int> mi(dim);
         std::fill(std::begin(mi), std::end(mi), 2); // grau 2
         for (auto &edge : one_tree_edges)
@@ -85,23 +85,60 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
             --mi[edge.second];
         }
 
-        // Lower Bound
-        double LB = kruskal.cost;
-        if (LB > bestLB)
+        // Calculando o passo
+        double ssq = 0.0; // soma dos quadrados
+        for (size_t i = 0; i < mi.size(); ++i)
         {
+            ssq += mi[i] * mi[i];
+        }
+        double step = rho * (UB - std::ceil(LB)) / ssq; // passo
+
+        // Atualizacao dos multiplicadores
+        for (size_t i = 0; i < u.size(); ++i)
+        {
+            u[i] += step * mi[i];
+        }
+
+        // Verificando se teve melhoria no LB
+        if (LB > bestLB && LB <= UB)
+        {
+            // Att LB
             bestLB = LB;
 
-            // atualizando a melhor arvore
-            best_tree = one_tree_edges;
+            // Att melhor solucao (no)
+            // Att a melhor arvore
+            node.one_tree = one_tree_edges;
 
-            // vertice de maior grau
+            // Vertice de maior grau
             std::vector<int>::iterator it = std::min_element(mi.begin(),
                                                              mi.end());
-            maior_grau_pos = std::distance(mi.begin(), it);
+            node.maior_grau_i = std::distance(mi.begin(), it);
+
+            // Att o node
+            node.LB = bestLB;
+
+            // Att multiplicadores
+            node.multiplicadores = u;
+
+            // Condicao de parada 2
+            // se *it == 0 -> ciclo hamiltoniano (solucao viavel UB) ?
+            if (*it == 0)
+            {
+                node.LB = LB;
+                node.is_upper_bound = true;
+                break;
+            }
+
+            // Verificando solucao otima
+            if (std::ceil(bestLB) == UB) // condicao de parada 3
+            {
+                node.otimo = true;
+                break;
+            }
 
             ite_fail = 0;
         }
-        else // sem melhoria no LB
+        else // Sem melhoria no LB
         {
             ++ite_fail;
             if (ite_fail >= p)
@@ -110,43 +147,6 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
                 ite_fail = 0;
             }
         }
-
-        // varificando solucao otima
-        if (std::ceil(bestLB) == UB) // condicao de parada 2
-        {
-            node.otimo = true;
-            bestLB = UB;
-            break;
-        }
-        bestLB = std::max(bestLB, LB);
-
-        // calculando o passo
-        double ssq = 0.0; // soma dos quadrados
-        for (size_t i = 0; i < mi.size(); ++i)
-        {
-            ssq += mi[i] * mi[i];
-        }
-
-        double step = rho * (UB - LB) / ssq; // passo
-
-        // Atualizacao dos multiplicadores
-        for (size_t i = 0; i < u.size(); ++i)
-        {
-            u[i] += step * mi[i];
-        }
-
-        // condicao de parada 3
-        if (ssq == 0) // solucao viavel
-        {
-            node.LB = calculateCost(C, one_tree_edges);
-            node.is_upper_bound = true;
-            break;
-        }
+        // ----------------------------------------------------------------
     }
-
-    // Att o node
-    node.LB = bestLB;
-    node.multiplicadores = u;
-    node.one_tree = best_tree;
-    node.maior_grau_i = maior_grau_pos;
 }
