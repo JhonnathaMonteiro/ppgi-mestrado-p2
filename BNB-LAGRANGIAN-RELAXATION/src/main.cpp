@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
     // TODO: Gerar upper_bound com GILS-RVND-TSP
     // double UB = 426; //eil51.tsp <---- OTIMO
-    double UB = 429; //eil51.tsp
+    double UB = 430; //eil51.tsp
     // double UB = 500; //eil51.tsp
 
     // double UB = 3323; //burma14.tsp

@@ -42,7 +42,7 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
     int ite_fail = 0;
 
     // menor valor de rho
-    double min_rho = rho / std::pow(2, 32);
+    double min_rho = rho / std::pow(2, 16); // divisoes de rho pela metade
 
     // best lower bound
     double bestLB = 0;
@@ -52,14 +52,13 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
 
     while (rho > min_rho) // condicao de parada 1
     {
-        // Matriz de custo lagrangiana (_c)
+        // Matriz de custo lagrangiana (_C) baseada em u
         std::vector<std::vector<double>> _C(dim, std::vector<double>(dim));
-        for (int i = 0; i < dim; ++i)
+        for (int row = 0; row < dim; ++row)
         {
-            for (int j = 0; j < dim; ++j)
+            for (int col = 0; col < dim; ++col)
             {
-                _C[i][j] = C[i][j] - u[i] - u[j];
-                _C[j][i] = _C[i][j];
+                _C[row][col] = C[row][col] - u[row] - u[col];
             }
         }
 
@@ -91,13 +90,8 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
         {
             ssq += mi[i] * mi[i];
         }
-        double step = rho * (UB - std::ceil(LB)) / ssq; // passo
-
-        // Atualizacao dos multiplicadores
-        for (size_t i = 0; i < u.size(); ++i)
-        {
-            u[i] += step * mi[i];
-        }
+        double step = rho * (UB - LB) / ssq; // passo
+        // double step = rho * (LB - UB) / ssq; // passo
 
         // Verificando se teve melhoria no LB
         if (LB > bestLB && LB <= UB)
@@ -122,10 +116,11 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
 
             // Condicao de parada 2
             // se *it == 0 -> ciclo hamiltoniano (solucao viavel UB) ?
-            if (*it == 0)
+            if (*it == 0) // n tenh0 ctz disso aqui!
             {
                 node.LB = LB;
                 node.is_upper_bound = true;
+                node.otimo = true;
                 break;
             }
 
@@ -148,5 +143,15 @@ void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, doub
             }
         }
         // ----------------------------------------------------------------
+
+        // Atualizacao dos multiplicadores
+        for (size_t i = 0; i < u.size(); ++i)
+        {
+            u[i] += step * mi[i];
+        }
     }
+    // REMOVER
+    std::cout << "NODE LB: " << node.LB << std::endl;
+    // std::cout << "NODE LB: " << node.LB << " CalcCostRE: " << calculateCost(C, node.one_tree) << std::endl;
+    // ------------
 }

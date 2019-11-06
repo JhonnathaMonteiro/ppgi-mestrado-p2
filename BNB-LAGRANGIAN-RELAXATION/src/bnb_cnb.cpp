@@ -18,7 +18,9 @@ void calcularSolucao(Node &node, double **cost, int dim, double UB)
     {
         for (auto &arco : node.arcos_proibidos)
         {
+            // bloqueando a aresta nos dois sentidos c[i][j] e c[j][i]
             cost[arco.first][arco.second] = INFINITE;
+            cost[arco.second][arco.first] = INFINITE;
         }
     }
 
@@ -30,12 +32,12 @@ void calcularSolucao(Node &node, double **cost, int dim, double UB)
  * 
  * @param cost ** matriz de custo
  * @param dim dimencao da matriz de custo
- * @param heuristic_UB upper bound da heuristica
+ * @param UB upper bound da heuristica
  * @param busca int com o tipo de busca
  * 
  * @return o melhor node encontrado 
  */
-Node bnbComb(double **cost, int dim, double heuristic_UB, int busca)
+Node bnbComb(double **cost, int dim, double UB, int busca)
 {
     // raiz
     Node root_node;
@@ -49,13 +51,11 @@ Node bnbComb(double **cost, int dim, double heuristic_UB, int busca)
     std::list<Node> arvore;
 
     // resolvendo a raiz
-    // void calcularSolucao(Node &node, double **cost, int dim, double UB)
-    calcularSolucao(root_node, cost, dim, heuristic_UB);
+    calcularSolucao(root_node, cost, dim, UB);
     arvore.push_back(root_node);
 
     // inicializando a solucao
     Node bestNode, currentNode;
-    bestNode.LB = heuristic_UB; // partindo do UB da heuristica
 
     while (!arvore.empty())
     {
@@ -98,10 +98,6 @@ Node bnbComb(double **cost, int dim, double heuristic_UB, int busca)
             break;
         } // Fim Metodo de Busca
 
-        // REMOVER
-        std::cout << "NODE LB: " << currentNode.LB << std::endl;
-        // ------------
-
         // Verificar se o no atingiu a solucao otima
         if (currentNode.otimo)
         {
@@ -109,11 +105,16 @@ Node bnbComb(double **cost, int dim, double heuristic_UB, int busca)
             break;
         }
 
+        // Aqui eu to partindo do principio que o primeiro UB encontrado
+        // pode n ser a solucao otima (n tenho ctz disso)
         // Verificar se a solucao eh viavel (upper bound)
         if (currentNode.is_upper_bound)
         {
+            // UB
+            UB = currentNode.LB;
+
             // Verificar se possui solucao melhor que o bestNode
-            if (currentNode.LB < bestNode.LB)
+            if (currentNode.LB < UB)
             {
                 // Atualizar bestNode
                 bestNode = currentNode;
@@ -138,11 +139,11 @@ Node bnbComb(double **cost, int dim, double heuristic_UB, int busca)
             N1.arcos_proibidos = currentNode.arcos_proibidos; // herda os arcos
             N1.multiplicadores = currentNode.multiplicadores; // herda os multiplicadores
             N1.arcos_proibidos.push_back(arco);
-            calcularSolucao(N1, cost, dim, bestNode.LB);
+            calcularSolucao(N1, cost, dim, UB);
 
             // Verificando se o no deve ser adicionado na arvore valores maiores que
-            // o melhor UB (bestNode.LB) nao devem ser explorado.
-            if (N1.LB <= bestNode.LB)
+            // o melhor UB (UB) nao devem ser explorado.
+            if (N1.LB <= UB)
             {
                 arvore.push_back(N1);
 
