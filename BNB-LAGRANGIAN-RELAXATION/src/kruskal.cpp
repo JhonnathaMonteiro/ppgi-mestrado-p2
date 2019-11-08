@@ -41,6 +41,17 @@ vii Kruskal::getEdges()
 	return edges;
 }
 
+std::vector<int> Kruskal::getSubGrad()
+{
+	std::vector<int> subGrad(d.size(), 2); // zeros vector
+	for (auto &edge : edges)
+	{
+		--subGrad[edge.first];
+		--subGrad[edge.second];
+	}
+	return subGrad;
+}
+
 void Kruskal::mst_to_oneTree()
 {
 	// custos das arestas associadas ao vertice 0 d[0];

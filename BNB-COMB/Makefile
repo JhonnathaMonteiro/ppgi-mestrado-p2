@@ -34,6 +34,15 @@ build:
 debug: CXXFLAGS += -DDEBUG -g
 debug: all
 
+test_burma14: release
+	./build/apps/$(TARGET) ./instances/burma14.tsp
+
+test_bier127: release
+	./build/apps/$(TARGET) ./instances/bier127.tsp
+
+test_eil51: release
+	./build/apps/$(TARGET) ./instances/eil51.tsp
+
 release: CXXFLAGS += -O2
 release: all
 

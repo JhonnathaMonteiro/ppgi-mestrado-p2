@@ -3,24 +3,6 @@
 #include "sub_gradient.h"
 
 /**
- * Funcao para calcular o somatorio dos custos das arestas
- * 
- * @param edges std::vector<pair<int,int>> arestas
- * @param C matriz de custo
- * @return double com custo acumulado das arestas
-*/
-double calculateCost(double **C, std::vector<pair<int, int>> edges)
-{
-    double custo = 0.0;
-    for (auto &edge : edges)
-    {
-        custo += C[edge.first][edge.second];
-    }
-
-    return custo;
-}
-
-/**
  * Metodo do subgradiente para relaxacao lagrangiana do problema 
  * TSP simetrico.
  * 
@@ -28,130 +10,102 @@ double calculateCost(double **C, std::vector<pair<int, int>> edges)
  * @param node no
  * @param C matriz de custo
  * @param dim dimencao da matriz de custo
- * @param u vetor com os multiplicadores lagrangeanos
- * @param UB upper bound da heuristica
- * @param rho paramentro de controle do passo (default = 2)
- * @return struct Node com as informacoes do no
+ * @param lambda vetor com os multiplicadores lagrangeanos
+ * @param UB upper bound
 */
-void subgrad_method(Node &node, double **C, int dim, std::vector<double> u, double UB, double rho)
+void subgrad_method(Node &node,
+                    double **C,
+                    size_t dim,
+                    std::vector<double> lambda,
+                    double UB)
 {
-    // Numero maximo de iteracoes conscutivas sem aumento do valor de LB
-    int p = 30;
+    int Tmax = 2000;    // Numero maximo de iteracoes
+    int count = 1;      // Contador de iteracoes
+    int Tlim = 10;      // Numero maximo de falhas consecutivas (em melhorar o LB)
+    int fail_count = 0; // Contador de falhas consecutivas
 
-    // contador de iteracoes conscutivas sem aumento do valor de LB
-    int ite_fail = 0;
+    double sigma = 2; // Parametro de refinamento dos multiplicadores
+    double LB = 0;    // LB inicial igual
+    node.LB = LB;
 
-    // menor valor de rho
-    double min_rho = rho / std::pow(2, 16); // divisoes de rho pela metade
-
-    // best lower bound
-    double bestLB = 0;
-
-    // Arestas da 1-arvore
-    vii one_tree_edges;
-
-    while (rho > min_rho) // condicao de parada 1
+    while (!node.isFeasible && LB < UB && count < Tmax)
     {
-        // Matriz de custo lagrangiana (_C) baseada em u
+        // Primeiro passo: encontrar a min 1-tree
+        // com: _c(i,j) = c(i,j) - lambda(i) - lambda(j)
         std::vector<std::vector<double>> _C(dim, std::vector<double>(dim));
-        for (int row = 0; row < dim; ++row)
+        for (size_t row = 0; row < dim; ++row)
         {
-            for (int col = 0; col < dim; ++col)
+            for (size_t col = 0; col < dim; ++col)
             {
-                _C[row][col] = C[row][col] - u[row] - u[col];
+                _C[row][col] = C[row][col] - lambda[row] - lambda[col];
             }
         }
-
-        // Rodar o Kruskal para gerar a 1-tree (bloking no vertice 0 por default)
         Kruskal kruskal(_C);
-
-        // Resolver mst
         kruskal.MST(dim);
+        kruskal.mst_to_oneTree();         // menor isercao do vertice 0
+        vii oneTree = kruskal.getEdges(); // arestas da one-tree
 
-        // Converter mst para one-tree
-        kruskal.mst_to_oneTree();            // menor isercao do vertice 0
-        one_tree_edges = kruskal.getEdges(); // arestas da one-tree
-
-        // Lower Bound
-        double LB = kruskal.cost;
-
-        // Subgradiente
-        std::vector<int> mi(dim);
-        std::fill(std::begin(mi), std::end(mi), 2); // grau 2
-        for (auto &edge : one_tree_edges)
+        // Segundo passo: encontrar o LB
+        double lambda_sum = 0.0;
+        for (auto &lambda_i : lambda)
         {
-            --mi[edge.first];
-            --mi[edge.second];
+            lambda_sum += lambda_i;
+        }
+        LB = kruskal.cost + 2 * lambda_sum;
+        if (LB > node.LB) // melhora no LB ?
+        {
+            fail_count = 0;
+        }
+        else
+        {
+            ++fail_count;
         }
 
-        // Calculando o passo
-        double ssq = 0.0; // soma dos quadrados
-        for (size_t i = 0; i < mi.size(); ++i)
+        // Terceiro passo: verificar se encontrou solucao viavel
+        std::vector<int> subgrad = kruskal.getSubGrad();
+        std::vector<int>::iterator it = std::min_element(subgrad.begin(),
+                                                         subgrad.end());
+
+        if (*it == 0) // Solucao viavel
         {
-            ssq += mi[i] * mi[i];
+            // Att node
+            node.maior_grau_i = std::distance(subgrad.begin(), it);
+            node.one_tree = oneTree;
+            node.LB = LB;
+            node.isFeasible = true;
+            node.multiplicadores = lambda;
         }
-        double step = rho * (UB - LB) / ssq; // passo
-        // double step = rho * (LB - UB) / ssq; // passo
-
-        // Verificando se teve melhoria no LB
-        if (LB > bestLB && LB <= UB)
+        else
         {
-            // Att LB
-            bestLB = LB;
 
-            // Att melhor solucao (no)
-            // Att a melhor arvore
-            node.one_tree = one_tree_edges;
-
-            // Vertice de maior grau
-            std::vector<int>::iterator it = std::min_element(mi.begin(),
-                                                             mi.end());
-            node.maior_grau_i = std::distance(mi.begin(), it);
-
-            // Att o node
-            node.LB = bestLB;
-
-            // Att multiplicadores
-            node.multiplicadores = u;
-
-            // Condicao de parada 2
-            // se *it == 0 -> ciclo hamiltoniano (solucao viavel UB) ?
-            if (*it == 0) // n tenh0 ctz disso aqui!
+            if (fail_count == 0 && LB < UB)
             {
+                // Att node
+                node.maior_grau_i = std::distance(subgrad.begin(), it);
+                node.one_tree = oneTree;
                 node.LB = LB;
-                node.is_upper_bound = true;
-                node.otimo = true;
-                break;
+                node.multiplicadores = lambda;
             }
 
-            // Verificando solucao otima
-            if (std::ceil(bestLB) == UB) // condicao de parada 3
+            // Quarto passo: Att multiplicadores
+            double norma2 = 0.0;
+            for (size_t i = 0; i < dim; i++)
             {
-                node.otimo = true;
-                break;
+                norma2 += subgrad[i] * subgrad[i];
             }
-
-            ite_fail = 0;
-        }
-        else // Sem melhoria no LB
-        {
-            ++ite_fail;
-            if (ite_fail >= p)
+            double step = sigma * (UB - LB) / norma2;
+            for (size_t i = 0; i < dim; ++i)
             {
-                rho /= 2;
-                ite_fail = 0;
+                lambda[i] += step * subgrad[i];
             }
         }
-        // ----------------------------------------------------------------
 
-        // Atualizacao dos multiplicadores
-        for (size_t i = 0; i < u.size(); ++i)
+        if (count % 30 == 0) // divide sigma a cada 30 iteracoes
+        // if (fail_count > Tlim)
         {
-            u[i] += step * mi[i];
+            sigma /= 2;
+            fail_count = 0;
         }
+        ++count;
     }
-    // REMOVER
-    std::cout << "NODE LB: " << node.LB << std::endl;
-    // std::cout << "NODE LB: " << node.LB << " CalcCostRE: " << calculateCost(C, node.one_tree) << std::endl;
-    // ------------
 }

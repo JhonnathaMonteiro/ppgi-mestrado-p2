@@ -33,9 +33,12 @@ int main(int argc, char **argv)
 
     double distancia = 0;
     const int tourSize = tour.size() - 1;
+    std::cout << "path: " << std::endl;
     for (int i = 0, j = 1; i < tourSize; i++, j++)
     {
         distancia += matrizAdj[tour[i]][tour[j]];
+        std::cout << tour[i] << " : " << tour[j];
     }
+    std::cout << std::endl;
     std::cout << " Distancia -> " << distancia << std::endl;
 }

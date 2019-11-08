@@ -56,7 +56,7 @@ void calcularSolucao(Node &node, double **cost, int dim)
 /*
 * Branch and bound combinatorio
 */
-Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, int busca)
+Node bnbComb(std::list<Node> arvore, Data *data, size_t dim, double upper_bound, int busca)
 {
 
     //inicializando a solucao
@@ -147,20 +147,20 @@ Node bnbComb(std::list<Node> arvore, Data *data, int dim, double upper_bound, in
                     //atualizar o melhor node
                     bestNode = N1;
 
+                    // examina se e possivel pode podar alguns nós por limite da arvore
+                    for (it = arvore.begin(); it != arvore.end(); ++it)
+                    {
+                        if (it->lower_bound > N1.lower_bound)
+                        {
+                            //remover no
+                            arvore.erase(it);
+                        }
+                    }
+
                     if (bestNode.lower_bound == upper_bound)
                     {
                         otimo = true;
                         break;
-                    }
-                }
-
-                // examina se e possivel pode podar alguns nós por limite da arvore
-                for (it = arvore.begin(); it != arvore.end(); ++it)
-                {
-                    if (it->lower_bound > N1.lower_bound)
-                    {
-                        //remover no
-                        arvore.erase(it);
                     }
                 }
             }

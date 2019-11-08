@@ -36,7 +36,8 @@ int main(int argc, char **argv)
     // Uper_bound para instancia burma14.tsp
     // deve ser modificado para outras instancias
     // TODO: Gerar upper_bound com GILS-RVND-TSP
-    double upper_bound = 3323;
+    double upper_bound = 3323; // <- otimo
+    // double upper_bound = 3400;
 
     //branch and bound
     // int busca = BUSCA_BEST_BOUND;

@@ -24,6 +24,7 @@ public:
 
 	double MST(int nodes);
 	vii getEdges();
+	std::vector<int> getSubGrad();
 	void mst_to_oneTree();
 	double cost;
 	size_t N;

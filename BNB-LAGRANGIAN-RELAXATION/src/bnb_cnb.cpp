@@ -10,7 +10,7 @@ void _eraseByValue(std::vector<int> &vec, int val)
 /*
 * Funcao para calcular a solucao do node e atualiza sua estrutura
 */
-void calcularSolucao(Node &node, double **cost, int dim, double UB)
+void calcularSolucao(Node &node, double **cost, size_t dim, double UB)
 {
 
     //verificar arcos proibidos e modificar a matriz de custo de acordo
@@ -18,13 +18,12 @@ void calcularSolucao(Node &node, double **cost, int dim, double UB)
     {
         for (auto &arco : node.arcos_proibidos)
         {
-            // bloqueando a aresta nos dois sentidos c[i][j] e c[j][i]
             cost[arco.first][arco.second] = INFINITE;
             cost[arco.second][arco.first] = INFINITE;
         }
     }
 
-    subgrad_method(node, cost, dim, node.multiplicadores, UB, 2); // rho = 2
+    subgrad_method(node, cost, (size_t)dim, node.multiplicadores, UB);
 }
 
 /**
@@ -37,14 +36,13 @@ void calcularSolucao(Node &node, double **cost, int dim, double UB)
  * 
  * @return o melhor node encontrado 
  */
-Node bnbComb(double **cost, int dim, double UB, int busca)
+Node bnbComb(double **cost, size_t dim, double UB, int busca)
 {
     // raiz
     Node root_node;
 
     // multiplicadores do no raiz {0, ... , 0}
     std::vector<double> u(dim);
-    std::fill(std::begin(u), std::end(u), 0);
     root_node.multiplicadores = u;
 
     // inicializando arvore
@@ -56,6 +54,7 @@ Node bnbComb(double **cost, int dim, double UB, int busca)
 
     // inicializando a solucao
     Node bestNode, currentNode;
+    bestNode = root_node;
 
     while (!arvore.empty())
     {
@@ -98,26 +97,35 @@ Node bnbComb(double **cost, int dim, double UB, int busca)
             break;
         } // Fim Metodo de Busca
 
-        // Verificar se o no atingiu a solucao otima
-        if (currentNode.otimo)
-        {
-            bestNode = currentNode;
-            break;
-        }
+        //PRINT NODE
+        std::cout << "CurrentNode LB:" << currentNode.LB << std::endl;
 
-        // Aqui eu to partindo do principio que o primeiro UB encontrado
-        // pode n ser a solucao otima (n tenho ctz disso)
-        // Verificar se a solucao eh viavel (upper bound)
-        if (currentNode.is_upper_bound)
+        // Solucao viavel
+        if (currentNode.isFeasible)
         {
-            // UB
-            UB = currentNode.LB;
+            // solucao otima
+            if (currentNode.LB == UB)
+            {
+                bestNode = currentNode;
+                break;
+            }
+
+            // Examinando se eh possivel pode podar alguns nos por limite
+            for (it = arvore.begin(); it != arvore.end(); ++it)
+            {
+                if (it->LB > currentNode.LB)
+                {
+                    arvore.erase(it);
+                }
+            }
 
             // Verificar se possui solucao melhor que o bestNode
             if (currentNode.LB < UB)
             {
-                // Atualizar bestNode
+                UB = currentNode.LB;
                 bestNode = currentNode;
+                arvore.erase(currPos);
+                continue;
             }
         }
 
@@ -140,30 +148,9 @@ Node bnbComb(double **cost, int dim, double UB, int busca)
             N1.multiplicadores = currentNode.multiplicadores; // herda os multiplicadores
             N1.arcos_proibidos.push_back(arco);
             calcularSolucao(N1, cost, dim, UB);
-
-            // Verificando se o no deve ser adicionado na arvore valores maiores que
-            // o melhor UB (UB) nao devem ser explorado.
-            if (N1.LB <= UB)
+            if (N1.LB != 0)
             {
                 arvore.push_back(N1);
-
-                // Verificando se foi encontrado um upper_bound (solucao viavel)
-                if (N1.is_upper_bound)
-                {
-
-                    // Atualizando o UB
-                    bestNode = N1;
-
-                    // Examinando se eh possivel pode podar alguns nos por limite
-                    for (it = arvore.begin(); it != arvore.end(); ++it)
-                    {
-                        if (it->LB > N1.LB)
-                        {
-                            //remover no
-                            arvore.erase(it);
-                        }
-                    }
-                }
             }
         }
 
