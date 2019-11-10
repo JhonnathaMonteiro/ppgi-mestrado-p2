@@ -35,16 +35,34 @@ void printNode(const Node &node, const std::list<Node> &arvore, const double &UB
 }
 
 /**
+ * Funcao para calcular o somatorio dos custos das arestas
+ * 
+ * @param edges std::vector<pair<int,int>> arestas
+ * @param C matriz de custo
+ * @return double com custo acumulado das arestas
+*/
+double calculateCost(double **C, std::vector<pair<int, int>> edges)
+{
+    double val = 0.0;
+    for (auto &edge : edges)
+    {
+        val += C[edge.first][edge.second];
+    }
+
+    return val;
+}
+
+/**
  * Branch and bound
  * 
- * @param cost ** matriz de custo
+ * @param C ** matriz de custo
  * @param dim dimencao da matriz de custo
  * @param UB upper bound da heuristica
  * @param busca int com o tipo de busca
  * 
  * @return o melhor node encontrado 
  */
-Node bnbComb(double **cost, size_t dim, double UB, int busca)
+Node bnbComb(double **C, size_t dim, double UB, int busca)
 {
     // Raiz
     Node root_node;
@@ -61,7 +79,7 @@ Node bnbComb(double **cost, size_t dim, double UB, int busca)
     root_node.ID = nodeCount;
 
     // resolvendo a raiz
-    subgrad_method(root_node, cost, dim, UB);
+    subgrad_method(root_node, C, dim, UB);
     arvore.push_back(root_node);
 
     // inicializando a solucao
@@ -115,6 +133,9 @@ Node bnbComb(double **cost, size_t dim, double UB, int busca)
         // Solucao viavel
         if (currentNode.isFeasible)
         {
+            // Calculando custo real
+            currentNode.LB = calculateCost(C, currentNode.edges);
+
             // Solucao otima
             if (std::abs(UB - currentNode.LB) <= EPSILON)
             {
@@ -122,15 +143,14 @@ Node bnbComb(double **cost, size_t dim, double UB, int busca)
                 break;
             }
 
-            // // Examinando se eh possivel pode podar alguns nos por limite
-            // std::list<Node>::iterator it2; //iterador
-            // for (it2 = arvore.begin(); it2 != arvore.end(); ++it2)
-            // {
-            //     if (it2->LB > currentNode.LB)
-            //     {
-            //         arvore.erase(it2);
-            //     }
-            // }
+            // Examinando se eh possivel pode podar alguns nos por limite
+            for (it = arvore.begin(); it != arvore.end(); it++)
+            {
+                if (it->LB > currentNode.LB)
+                {
+                    it->pruning = true;
+                }
+            }
 
             // Verificar se possui solucao melhor que o bestNode
             if (currentNode.LB < UB)
@@ -151,7 +171,7 @@ Node bnbComb(double **cost, size_t dim, double UB, int busca)
 
             // Determinando os Arcos Proibidos
             std::vector<std::pair<int, int>> arcos_p;
-            for (auto &edge : currentNode.one_tree)
+            for (auto &edge : currentNode.edges)
             {
                 if (edge.first == currentNode.maior_grau_i || edge.second == currentNode.maior_grau_i)
                 {
@@ -169,7 +189,7 @@ Node bnbComb(double **cost, size_t dim, double UB, int busca)
                 N1.ID = nodeCount;
                 N1.arcos_proibidos.push_back(arco);
 
-                subgrad_method(N1, cost, dim, UB);
+                subgrad_method(N1, C, dim, UB);
 
                 arvore.push_back(N1);
                 ++nodeCount;

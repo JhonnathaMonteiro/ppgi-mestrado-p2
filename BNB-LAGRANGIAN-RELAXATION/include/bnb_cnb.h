@@ -20,8 +20,7 @@ typedef struct node
 {
     std::vector<std::pair<int, int>> arcos_proibidos; // lista de arcos proibidos
     std::vector<double> multiplicadores;              // multiplicadores de lagrange do no
-                                                      // solucao do algoritmo hungaro)
-    std::vector<std::pair<int, int>> one_tree;        // 1-arvore solucao modificada do kruskal
+    std::vector<std::pair<int, int>> edges;           // 1-arvore solucao modificada do kruskal
     int maior_grau_i;                                 // indice do vertice com maior grau
     double LB = 0;                                    // valor da solucao
     int ID = 0;                                       // numero do no

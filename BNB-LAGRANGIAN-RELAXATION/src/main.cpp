@@ -1,8 +1,7 @@
 #include <iostream>
-#include <vector>
-#include <list>
-#include <numeric>
-#include <algorithm>
+// #include <vector>
+// #include <numeric>
+// #include <algorithm>
 
 #include "data.h"
 #include "bnb_cnb.h"
@@ -29,11 +28,15 @@ int main(int argc, char **argv)
 
     // EIL51
     // double UB = 426; //eil51.tsp <---- OTIMO
-    // double UB = 428; //eil51.tsp <---- OTIMO
+    // double UB = 428; //eil51.tsp
 
     // GR21
     // double UB = 2707;
     // double UB = 2708;
+
+    // dantzig42
+    // double UB = 699;
+    // double UB = 700;
 
     // GR48
     // double UB = 5046; // otimo!
@@ -53,6 +56,7 @@ int main(int argc, char **argv)
     }
 
     // Solucao
+    std::cout << std::string(80, '*') << std::endl;
     std::cout << "Solucao: " << solucao.LB << std::endl;
 
     return 0;

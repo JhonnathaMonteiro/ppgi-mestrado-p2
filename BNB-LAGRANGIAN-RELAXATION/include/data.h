@@ -2,7 +2,6 @@
 #define DATA_H
 
 #include <iostream>
-#include <string>
 #include <fstream>
 #include <math.h>
 #include <limits>

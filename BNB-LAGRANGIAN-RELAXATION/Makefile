@@ -49,6 +49,9 @@ test_gr48: release
 test_eil51: release
 	./build/apps/$(TARGET) ./instances/eil51.tsp
 
+test_dantzig42: release
+	./build/apps/$(TARGET) ./instances/dantzig42.tsp
+
 clean:
 	-@rm -rvf $(OBJ_DIR)/*
 	-@rm -rvf $(APP_DIR)/*

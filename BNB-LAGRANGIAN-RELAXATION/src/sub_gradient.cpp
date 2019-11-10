@@ -21,7 +21,7 @@ void subgrad_method(Node &node,
     int fail_count = 0;                                // Contador de falhas
     std::vector<double> lambda = node.multiplicadores; // multiplicadores
     double sigma = 1;                                  // Parametro de refinamento dos multiplicadores
-    double sigma_lim = 1.0 / 16364.0;                  // Menor valor permitido de sigma
+    double sigma_lim = sigma / 16364.0;                // Menor valor permitido de sigma
     double LB;
     double treeCost;
 
@@ -68,15 +68,6 @@ void subgrad_method(Node &node,
             lambda_sum += lambda_i;
         }
         LB = treeCost + 2 * lambda_sum;
-        if ((LB - node.LB) <= EPSILON)
-        {
-            ++fail_count;
-        }
-        if (fail_count == 30)
-        {
-            sigma /= 2;
-            fail_count = 0;
-        }
 
         // Terceiro passo: verificar se encontrou solucao viavel
         std::vector<int> subgrad(dim, 2); // vetor subgradiente
@@ -88,11 +79,23 @@ void subgrad_method(Node &node,
         std::vector<int>::iterator it = std::min_element(subgrad.begin(),
                                                          subgrad.end());
 
-        // Att node
-        node.maior_grau_i = std::distance(subgrad.begin(), it);
-        node.one_tree = oneTree;
-        node.LB = LB;
-        node.multiplicadores = lambda;
+        if ((LB - node.LB) <= EPSILON) // Sem melhora no z
+        {
+            ++fail_count;
+        }
+        else // Com melhora no z
+        {
+            // Att node
+            node.maior_grau_i = std::distance(subgrad.begin(), it);
+            node.edges = oneTree;
+            node.LB = LB;
+            node.multiplicadores = lambda;
+        }
+        if (fail_count == 30)
+        {
+            sigma /= 2;
+            fail_count = 0;
+        }
 
         if (*it == 0) // Solucao viavel
         {
