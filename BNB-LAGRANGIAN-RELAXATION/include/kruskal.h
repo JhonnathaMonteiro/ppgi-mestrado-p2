@@ -7,9 +7,6 @@
 #include <queue>
 #include <utility>
 #include <limits>
-#include <algorithm> // std::fill
-#include <iterator>  // std::distance
-#include <math.h>	//pow
 
 using namespace std;
 
@@ -24,10 +21,6 @@ public:
 
 	double MST(int nodes);
 	vii getEdges();
-	std::vector<int> getSubGrad();
-	void mst_to_oneTree();
-	double cost;
-	size_t N;
 
 private:
 	priority_queue<pair<double, ii>> graph;
@@ -36,6 +29,7 @@ private:
 	vvi d;
 
 	void initDisjoint(int n);
+	size_t N;
 	int findSet(int i);
 	void unionSet(int i, int j);
 	bool isSameSet(int i, int j);

@@ -41,19 +41,25 @@ vii Kruskal::getEdges()
 	return edges;
 }
 
-std::vector<int> Kruskal::getSubGrad()
+double Kruskal::MST(int nodes)
 {
-	std::vector<int> subGrad(d.size(), 2); // zeros vector
-	for (auto &edge : edges)
-	{
-		--subGrad[edge.first];
-		--subGrad[edge.second];
-	}
-	return subGrad;
-}
+	initDisjoint(nodes);
 
-void Kruskal::mst_to_oneTree()
-{
+	double cost = 0;
+
+	while (!graph.empty())
+	{
+		pair<double, ii> p = graph.top();
+		graph.pop();
+
+		if (!isSameSet(p.second.first, p.second.second))
+		{
+			edges.push_back(make_pair(p.second.first, p.second.second));
+			cost += (-p.first);
+			unionSet(p.second.first, p.second.second);
+		}
+	}
+
 	// custos das arestas associadas ao vertice 0 d[0];
 	// iterando pelos valores de d[0] e escolhendo os dois menores valores
 	// (custo da menor insercao)
@@ -88,26 +94,6 @@ void Kruskal::mst_to_oneTree()
 
 	// alterando o custo
 	cost += d[0][menor] + d[0][proximo_menor];
-}
-
-double Kruskal::MST(int nodes)
-{
-	initDisjoint(nodes);
-
-	cost = 0;
-
-	while (!graph.empty())
-	{
-		pair<double, ii> p = graph.top();
-		graph.pop();
-
-		if (!isSameSet(p.second.first, p.second.second))
-		{
-			edges.push_back(make_pair(p.second.first, p.second.second));
-			cost += (-p.first);
-			unionSet(p.second.first, p.second.second);
-		}
-	}
 
 	return cost;
 }

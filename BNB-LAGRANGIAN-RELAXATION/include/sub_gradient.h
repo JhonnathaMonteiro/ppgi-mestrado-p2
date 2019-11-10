@@ -9,6 +9,6 @@
 #include <iterator>  // std::distance
 #include <math.h>    //pow
 
-void subgrad_method(Node &, double **, size_t, std::vector<double>, double);
+void subgrad_method(Node &, double **, size_t, double);
 
 #endif

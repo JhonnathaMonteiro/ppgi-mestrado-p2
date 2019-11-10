@@ -1,13 +1,14 @@
 #ifndef DATA_H
 #define DATA_H
 
-#define INFINITE 99999999
-
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <math.h>
+#include <limits>
 using namespace std;
+
+#define INFINITE std::numeric_limits<double>::infinity();
 
 class Data
 {
@@ -44,4 +45,4 @@ private:
     bool explicitCoord;
 };
 
-#endif
+#endif // DATA_H

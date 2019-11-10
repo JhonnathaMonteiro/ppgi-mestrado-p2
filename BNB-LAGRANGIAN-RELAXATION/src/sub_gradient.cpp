@@ -16,22 +16,39 @@
 void subgrad_method(Node &node,
                     double **C,
                     size_t dim,
-                    std::vector<double> lambda,
                     double UB)
 {
-    int Tmax = 2000;    // Numero maximo de iteracoes
-    int count = 1;      // Contador de iteracoes
-    int Tlim = 10;      // Numero maximo de falhas consecutivas (em melhorar o LB)
-    int fail_count = 0; // Contador de falhas consecutivas
+    int fail_count = 0;                                // Contador de falhas
+    std::vector<double> lambda = node.multiplicadores; // multiplicadores
+    double sigma = 1;                                  // Parametro de refinamento dos multiplicadores
+    double sigma_lim = 1.0 / 16364.0;                  // Menor valor permitido de sigma
+    double LB;
+    double treeCost;
 
-    double sigma = 2; // Parametro de refinamento dos multiplicadores
-    double LB = 0;    // LB inicial igual
-    node.LB = LB;
+    std::vector<double> vetorInfinito1(node.arcos_proibidos.size(), std::numeric_limits<double>::infinity());
+    std::vector<double> vetorInfinito2(node.arcos_proibidos.size(), std::numeric_limits<double>::infinity());
 
-    while (!node.isFeasible && LB < UB && count < Tmax)
+    int count = 0;
+    for (const auto &arco : node.arcos_proibidos)
+    {
+        std::swap(C[arco.first][arco.second], vetorInfinito1[count]);
+        std::swap(C[arco.second][arco.first], vetorInfinito2[count]);
+        count++;
+    }
+
+    //verificar arcos proibidos e modificar a matriz de custo de acordo
+    if (!node.arcos_proibidos.empty())
+    {
+        for (auto &arco : node.arcos_proibidos)
+        {
+            C[arco.first][arco.second] = INFINITE;
+            C[arco.second][arco.first] = INFINITE;
+        }
+    }
+
+    while (!node.isFeasible)
     {
         // Primeiro passo: encontrar a min 1-tree
-        // com: _c(i,j) = c(i,j) - lambda(i) - lambda(j)
         std::vector<std::vector<double>> _C(dim, std::vector<double>(dim));
         for (size_t row = 0; row < dim; ++row)
         {
@@ -41,8 +58,7 @@ void subgrad_method(Node &node,
             }
         }
         Kruskal kruskal(_C);
-        kruskal.MST(dim);
-        kruskal.mst_to_oneTree();         // menor isercao do vertice 0
+        treeCost = kruskal.MST(dim);
         vii oneTree = kruskal.getEdges(); // arestas da one-tree
 
         // Segundo passo: encontrar o LB
@@ -51,61 +67,67 @@ void subgrad_method(Node &node,
         {
             lambda_sum += lambda_i;
         }
-        LB = kruskal.cost + 2 * lambda_sum;
-        if (LB > node.LB) // melhora no LB ?
-        {
-            fail_count = 0;
-        }
-        else
+        LB = treeCost + 2 * lambda_sum;
+        if ((LB - node.LB) <= EPSILON)
         {
             ++fail_count;
         }
-
-        // Terceiro passo: verificar se encontrou solucao viavel
-        std::vector<int> subgrad = kruskal.getSubGrad();
-        std::vector<int>::iterator it = std::min_element(subgrad.begin(),
-                                                         subgrad.end());
-
-        if (*it == 0) // Solucao viavel
-        {
-            // Att node
-            node.maior_grau_i = std::distance(subgrad.begin(), it);
-            node.one_tree = oneTree;
-            node.LB = LB;
-            node.isFeasible = true;
-            node.multiplicadores = lambda;
-        }
-        else
-        {
-
-            if (fail_count == 0 && LB < UB)
-            {
-                // Att node
-                node.maior_grau_i = std::distance(subgrad.begin(), it);
-                node.one_tree = oneTree;
-                node.LB = LB;
-                node.multiplicadores = lambda;
-            }
-
-            // Quarto passo: Att multiplicadores
-            double norma2 = 0.0;
-            for (size_t i = 0; i < dim; i++)
-            {
-                norma2 += subgrad[i] * subgrad[i];
-            }
-            double step = sigma * (UB - LB) / norma2;
-            for (size_t i = 0; i < dim; ++i)
-            {
-                lambda[i] += step * subgrad[i];
-            }
-        }
-
-        if (count % 30 == 0) // divide sigma a cada 30 iteracoes
-        // if (fail_count > Tlim)
+        if (fail_count == 30)
         {
             sigma /= 2;
             fail_count = 0;
         }
-        ++count;
+
+        // Terceiro passo: verificar se encontrou solucao viavel
+        std::vector<int> subgrad(dim, 2); // vetor subgradiente
+        for (auto &edge : oneTree)
+        {
+            --subgrad[edge.first];
+            --subgrad[edge.second];
+        }
+        std::vector<int>::iterator it = std::min_element(subgrad.begin(),
+                                                         subgrad.end());
+
+        // Att node
+        node.maior_grau_i = std::distance(subgrad.begin(), it);
+        node.one_tree = oneTree;
+        node.LB = LB;
+        node.multiplicadores = lambda;
+
+        if (*it == 0) // Solucao viavel
+        {
+            node.isFeasible = true;
+        }
+
+        if (node.isFeasible || std::abs(LB - UB) <= 0.000001)
+        {
+            node.pruning = true;
+            break;
+        }
+
+        // Quarto passo: Att multiplicadores
+        double norma2 = 0.0;
+        for (size_t i = 0; i < dim; ++i)
+        {
+            norma2 += subgrad[i] * subgrad[i];
+        }
+        double step = sigma * (UB - LB) / norma2;
+        for (size_t i = 0; i < dim; ++i)
+        {
+            lambda[i] += step * subgrad[i];
+        }
+
+        if (sigma < sigma_lim)
+        {
+            break;
+        }
+    }
+
+    count = 0;
+    for (const auto &arco : node.arcos_proibidos)
+    {
+        std::swap(C[arco.first][arco.second], vetorInfinito1[count]);
+        std::swap(C[arco.second][arco.first], vetorInfinito2[count]);
+        count++;
     }
 }

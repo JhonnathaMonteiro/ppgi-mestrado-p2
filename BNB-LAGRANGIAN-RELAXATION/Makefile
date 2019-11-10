@@ -40,8 +40,11 @@ release: all
 test_burma: release
 	./build/apps/$(TARGET) ./instances/burma14.tsp
 
-test_bier127: release
-	./build/apps/$(TARGET) ./instances/bier127.tsp
+test_gr21: release
+	./build/apps/$(TARGET) ./instances/gr21.tsp
+
+test_gr48: release
+	./build/apps/$(TARGET) ./instances/gr48.tsp
 
 test_eil51: release
 	./build/apps/$(TARGET) ./instances/eil51.tsp

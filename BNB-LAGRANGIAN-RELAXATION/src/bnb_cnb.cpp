@@ -1,33 +1,41 @@
+#include <iomanip>
+#include <iostream>
+#include <string>
+
 #include "bnb_cnb.h"
 #include "data.h"
 #include "sub_gradient.h"
 
-void _eraseByValue(std::vector<int> &vec, int val)
+void printNode(const Node &node, const std::list<Node> &arvore, const double &UB)
 {
-    vec.erase(std::remove(vec.begin(), vec.end(), val), vec.end());
-}
-
-/*
-* Funcao para calcular a solucao do node e atualiza sua estrutura
-*/
-void calcularSolucao(Node &node, double **cost, size_t dim, double UB)
-{
-
-    //verificar arcos proibidos e modificar a matriz de custo de acordo
-    if (!node.arcos_proibidos.empty())
+    // Header
+    if (arvore.size() % 100 == 0 || arvore.size() == 1)
     {
-        for (auto &arco : node.arcos_proibidos)
-        {
-            cost[arco.first][arco.second] = INFINITE;
-            cost[arco.second][arco.first] = INFINITE;
-        }
+        std::cout << std::string(80, '*') << std::endl;
+        std::cout << std::right;
+        std::cout << std::setw(10) << "TreeSize";
+        std::cout << std::setw(10) << "NodeID";
+        std::cout << std::setw(15) << "Feasible";
+        std::cout << std::setw(15) << "Pruning";
+        std::cout << std::setw(15) << "Z(LD)";
+        std::cout << std::setw(15) << "UB";
+        std::cout << std::endl;
+        std::cout << std::string(80, '*') << std::endl;
     }
 
-    subgrad_method(node, cost, (size_t)dim, node.multiplicadores, UB);
+    std::cout << std::setw(10) << arvore.size();
+    std::cout << std::setw(10) << node.ID;
+    std::cout << std::boolalpha;
+    std::cout << std::setw(15) << node.isFeasible;
+    std::cout << std::setw(15) << node.pruning;
+    std::cout << std::noboolalpha;
+    std::cout << std::setw(15) << node.LB;
+    std::cout << std::setw(15) << UB;
+    std::cout << std::endl;
 }
 
 /**
- * Branch and bound combinatorio
+ * Branch and bound
  * 
  * @param cost ** matriz de custo
  * @param dim dimencao da matriz de custo
@@ -38,18 +46,22 @@ void calcularSolucao(Node &node, double **cost, size_t dim, double UB)
  */
 Node bnbComb(double **cost, size_t dim, double UB, int busca)
 {
-    // raiz
+    // Raiz
     Node root_node;
 
-    // multiplicadores do no raiz {0, ... , 0}
+    // Multiplicadores do no raiz {0, ... , 0}
     std::vector<double> u(dim);
     root_node.multiplicadores = u;
 
-    // inicializando arvore
+    // Inicializando arvore
     std::list<Node> arvore;
 
+    // Contador de nos
+    int nodeCount = 1;
+    root_node.ID = nodeCount;
+
     // resolvendo a raiz
-    calcularSolucao(root_node, cost, dim, UB);
+    subgrad_method(root_node, cost, dim, UB);
     arvore.push_back(root_node);
 
     // inicializando a solucao
@@ -60,7 +72,7 @@ Node bnbComb(double **cost, size_t dim, double UB, int busca)
     {
 
         // Metodo de busca
-        double menorLB = INFINITE;
+        double menorLB = std::numeric_limits<double>::infinity();
         std::list<Node>::iterator currPos; //posicao do no atual na arvore
         std::list<Node>::iterator it;      //iterador
 
@@ -97,64 +109,74 @@ Node bnbComb(double **cost, size_t dim, double UB, int busca)
             break;
         } // Fim Metodo de Busca
 
-        //PRINT NODE
-        std::cout << "CurrentNode LB:" << currentNode.LB << std::endl;
+        //PRINTING NODE
+        printNode(currentNode, arvore, UB);
 
         // Solucao viavel
         if (currentNode.isFeasible)
         {
-            // solucao otima
-            if (currentNode.LB == UB)
+            // Solucao otima
+            if (std::abs(UB - currentNode.LB) <= EPSILON)
             {
                 bestNode = currentNode;
                 break;
             }
 
-            // Examinando se eh possivel pode podar alguns nos por limite
-            for (it = arvore.begin(); it != arvore.end(); ++it)
-            {
-                if (it->LB > currentNode.LB)
-                {
-                    arvore.erase(it);
-                }
-            }
+            // // Examinando se eh possivel pode podar alguns nos por limite
+            // std::list<Node>::iterator it2; //iterador
+            // for (it2 = arvore.begin(); it2 != arvore.end(); ++it2)
+            // {
+            //     if (it2->LB > currentNode.LB)
+            //     {
+            //         arvore.erase(it2);
+            //     }
+            // }
 
             // Verificar se possui solucao melhor que o bestNode
             if (currentNode.LB < UB)
             {
                 UB = currentNode.LB;
                 bestNode = currentNode;
-                arvore.erase(currPos);
-                continue;
             }
         }
 
-        // Determinando os Arcos Proibidos
-        std::vector<pair<int, int>> arcos_p;
-        for (auto &edge : currentNode.one_tree)
+        if (!currentNode.pruning)
         {
-            if (edge.first == currentNode.maior_grau_i || edge.second == currentNode.maior_grau_i)
+            // acho que isso so funciona pra busca best_first
+            if (std::ceil(currentNode.LB) == UB)
             {
-                arcos_p.push_back(edge);
+                bestNode = currentNode;
+                break;
             }
-        }
 
-        // Iterando por arcos_p e proibindo um arco em cada branching
-        for (auto &arco : arcos_p)
-        {
-            // Criando node filho
-            Node N1;
-            N1.arcos_proibidos = currentNode.arcos_proibidos; // herda os arcos
-            N1.multiplicadores = currentNode.multiplicadores; // herda os multiplicadores
-            N1.arcos_proibidos.push_back(arco);
-            calcularSolucao(N1, cost, dim, UB);
-            if (N1.LB != 0)
+            // Determinando os Arcos Proibidos
+            std::vector<std::pair<int, int>> arcos_p;
+            for (auto &edge : currentNode.one_tree)
             {
+                if (edge.first == currentNode.maior_grau_i || edge.second == currentNode.maior_grau_i)
+                {
+                    arcos_p.push_back(edge);
+                }
+            }
+
+            // Iterando por arcos_p e proibindo um arco em cada branching
+            for (auto &arco : arcos_p)
+            {
+                // Criando node filho
+                Node N1;
+                N1.arcos_proibidos = currentNode.arcos_proibidos; // herda os arcos
+                N1.multiplicadores = currentNode.multiplicadores; // herda os multiplicadores
+                N1.ID = nodeCount;
+                N1.arcos_proibidos.push_back(arco);
+
+                subgrad_method(N1, cost, dim, UB);
+
                 arvore.push_back(N1);
+                ++nodeCount;
             }
         }
 
-        //remover o no atual
+        // Remover no atual
         arvore.erase(currPos);
     }
     return bestNode;

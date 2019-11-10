@@ -3,19 +3,20 @@
 #include <list>
 #include <numeric>
 #include <algorithm>
-#include <data.h>
 
+#include "data.h"
 #include "bnb_cnb.h"
 #include "sub_gradient.h"
 
 int main(int argc, char **argv)
 {
-    //leitura da instancia para o bnb
+
+    // Leitura da instancia para o bnb
     Data *data = new Data(argc, argv[1]);
     data->readData();
     size_t dim = data->getDimension();
 
-    //convertendo para uma matriz (double **)
+    // Gerando a matriz da instancia (double **)
     double **cost = new double *[dim];
     for (size_t i = 0; i < dim; i++)
     {
@@ -26,30 +27,32 @@ int main(int argc, char **argv)
         }
     }
 
-    // TODO: Gerar upper_bound com GILS-RVND-TSP
+    // EIL51
     // double UB = 426; //eil51.tsp <---- OTIMO
-    // double UB = 427; //eil51.tsp < nao viavel
-    // double UB = 500; //eil51.tsp
+    // double UB = 428; //eil51.tsp <---- OTIMO
 
-    double UB = 3323; //burma14.tsp < otimo
-    // double UB = 3324; //burma14.tsp < n viavel
-    // double UB = 3500; //burma14.tsp < n viavel
-    // double UB = 4164; //burma14.tsp < viavel
+    // GR21
+    // double UB = 2707;
+    // double UB = 2708;
 
-    //branch and bound
-    // int busca = BUSCA_BEST_BOUND;
-    int busca = BUSCA_EM_LARGURA;
+    // GR48
+    // double UB = 5046; // otimo!
+    double UB = 5048;
+
+    // Metodo de Busca
+    int busca = BUSCA_BEST_BOUND;
+    // int busca = BUSCA_EM_LARGURA;
     // int busca = BUSCA_EM_PROFUNDIDADE;
 
     Node solucao = bnbComb(cost, dim, UB, busca);
 
-    //free memory
+    // Free memory
     for (size_t i = 0; i < dim; ++i)
     {
         delete[] cost[i];
     }
 
-    //solucao
+    // Solucao
     std::cout << "Solucao: " << solucao.LB << std::endl;
 
     return 0;
