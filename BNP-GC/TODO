@@ -1,0 +1,17 @@
+A próxima atividade seria a implementação de um algoritmo de geração de colunas
+para resolver o Bin Packing. Na prática, a ideia é resolver a relaxação linear 
+da formulação com um número exponencial de variáveis via geração de colunas.
+
+http://www2.ic.uff.br/elavio/mini1.pdf
+
+O algoritmo de geração de colunas começa com um
+modelo com um conjunto restrito de variáveis, 
+designado por problema mestre restrito, que é optimizado.
+A informação dual do problema mestre restrito é utilizada 
+num (ou em vários) problema(s) de optimização
+auxiliar(es), designado(s) por subproblema(s), que se
+destina(m) a encontrar a variável de decisão (representada por uma coluna) 
+mais atractiva para inserir no
+problema mestre restrito, que é novamente reoptimizado. Estas operações são 
+repetidas até que mais nenhuma coluna atractiva seja encontrada, obtendo-se
+então uma solução que é comprovadamente óptima.
