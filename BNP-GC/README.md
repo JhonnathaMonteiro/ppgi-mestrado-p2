@@ -6,8 +6,6 @@
 
 ## Solving Bin Packing Using Branch and Price Algorithm
 
-**Badges will go here**
-
 [![Build Status](http://img.shields.io/travis/badges/badgerbadgerbadger.svg?style=flat-square)](https://travis-ci.org/badges/badgerbadgerbadger) 
 [![Coverage Status](http://img.shields.io/coveralls/badges/badgerbadgerbadger.svg?style=flat-square)](https://coveralls.io/r/badges/badgerbadgerbadger) 
 [![Gem Version](http://img.shields.io/gem/v/badgerbadgerbadger.svg?style=flat-square)](https://rubygems.org/gems/badgerbadgerbadger) 
@@ -16,8 +14,6 @@
 ---
 
 ## Table of Contents
-
-> If your `README` has a lot of info, section headers might be nice.
 
 - [Installation](#installation)
 - [Usage](#Usage)
@@ -28,9 +24,6 @@
 ---
 
 ## Installation
-
-- All the `code` required to get started
-- Images of what it should look like
 
 ### Clone
 
@@ -58,8 +51,8 @@ $ ./program <path_to_instance>
 
 ## Documentation
 
-- <a href="http://www2.ic.uff.br/elavio/mini1.pdf" target="_blank">`Jhonnatha Andrade`</a>
-- <a href="http://repositorio.unicamp.br/bitstream/REPOSIP/321614/1/Borges_YulleGlebbyoFelipe_M.pdf" target="_blank">`Jhonnatha Andrade`</a>
+- <a href="http://www2.ic.uff.br/elavio/mini1.pdf" target="_blank">`Eduardo Uchoa`</a>
+- <a href="http://repositorio.unicamp.br/bitstream/REPOSIP/321614/1/Borges_YulleGlebbyoFelipe_M.pdf" target="_blank">`Yulle Glebbyo Felipe Borges`</a>
 
 ---
 
