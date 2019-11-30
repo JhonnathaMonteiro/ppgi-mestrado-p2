@@ -37,8 +37,8 @@ debug: all
 release: CXXFLAGS += -O3
 release: all
 
-test_burma: release
-	./build/apps/$(TARGET) ./instances/test.bp
+test: release
+	./build/apps/$(TARGET) ./instances/binpack1.txt
 
 clean:
 	-@rm -rvf $(OBJ_DIR)/*

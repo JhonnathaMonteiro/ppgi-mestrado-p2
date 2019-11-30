@@ -1,46 +1,19 @@
+#include <iostream>
+
 #include "data_reader.h"
-#include "bnb_cnb.h"
-#include "sub_gradient.h"
+#include "bnp_gc.h"
 
 int main(int argc, char **argv)
 {
 
-    // Leitura da instancia para o bnb
-    Data *data = new Data(argc, argv[1]);
-    data->readData();
-    size_t dim = data->getDimension();
+    // Leitura da instancia para o bnp
+    DataReader<int> *data = new DataReader<int>(argc, argv[1]);
+    std::vector<int> w = data->getW();
 
-    // Gerando a matriz da instancia (double **)
-    double **cost = new double *[dim];
-    for (size_t i = 0; i < dim; i++)
+    for (auto &i : w)
     {
-        cost[i] = new double[dim];
-        for (size_t j = 0; j < dim; j++)
-        {
-            cost[i][j] = data->getDistance(i, j);
-        }
+        std::cout << i << std::endl;
     }
-
-    // GR48
-    // double UB = 5046; // otimo!
-    double UB = 5048;
-
-    // Metodo de Busca
-    int busca = BUSCA_BEST_BOUND;
-    // int busca = BUSCA_EM_LARGURA;
-    // int busca = BUSCA_EM_PROFUNDIDADE;
-
-    Node solucao = bnbComb(cost, dim, UB, busca);
-
-    // Free memory
-    for (size_t i = 0; i < dim; ++i)
-    {
-        delete[] cost[i];
-    }
-
-    // Solucao
-    std::cout << std::string(80, '*') << std::endl;
-    std::cout << "Solucao: " << solucao.LB << std::endl;
 
     return 0;
 }
