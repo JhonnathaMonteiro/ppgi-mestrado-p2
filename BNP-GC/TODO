@@ -6,9 +6,9 @@ da formulação com um número exponencial de variáveis via geração de coluna
     [X] Encontrar as instancia
     [X] Montar estrutura do reader
     [X] Testar
-[ ] Definir o solver do no 
-    [ ]
-    [ ]
+[ ] Implementar metodos na classe matrix
+    [ ] Calcular Inversa
+    [ ] Calcular Determinante
 [ ] Montar o BnP
     [ ]
     [ ]

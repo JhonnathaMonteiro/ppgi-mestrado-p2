@@ -22,7 +22,7 @@ private:
 
 public:
     DataReader(int, char *);
-    int getCap() { return _bin_cap; }
+    T getCap() { return _bin_cap; }
     int getN() { return _num_of_itens; }
     int getOpt() { return _opt_solution; }
 
