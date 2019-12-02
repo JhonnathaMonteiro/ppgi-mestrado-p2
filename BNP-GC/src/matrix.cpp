@@ -46,6 +46,15 @@ Matrix<T>::Matrix(const Matrix<T> &rhs)
   cols = rhs.get_cols();
 }
 
+// Construtor por copia de vetor
+template <typename T>
+Matrix<T>::Matrix(const std::vector<T> &rhs)
+{
+  mat.push_back(rhs);
+  rows = 1;
+  cols = (unsigned)rhs.size();
+}
+
 // (Virtual) Destructor
 template <typename T>
 Matrix<T>::~Matrix() {}
@@ -203,16 +212,15 @@ template <typename T>
 Matrix<T> Matrix<T>::inverse()
 {
   Matrix result(rows, cols, 0.0);
-  for (unsigned i = 0; i < rows; i++)
+  T det = this->determinant(*this, this->get_rows());
+  Matrix<T> adj = this->adjoint();
+  for (unsigned row = 0; row < this->get_rows(); row++)
   {
-    for (unsigned j = 0; j < cols; j++)
+    for (unsigned col = 0; col < this->get_cols(); col++)
     {
-      result(i, j) = this->mat[i][j];
+      result[row][col] = adj[row][col] / det;
     }
   }
-
-  // CALCULAR A INVERSA EM result AQUI
-
   return result;
 }
 
@@ -274,7 +282,7 @@ T Matrix<T>::determinant(Matrix<T> &A, unsigned n)
   // Tecnica recursiva para o calculo do determinante
   T result = 0;
   if (n == 1)
-    return this->mat[0][0];
+    return A[0][0];
 
   int sign = 1;
   for (unsigned f = 0; f < n; f++)

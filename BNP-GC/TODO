@@ -7,8 +7,12 @@ da formulação com um número exponencial de variáveis via geração de coluna
     [X] Montar estrutura do reader
     [X] Testar
 [ ] Implementar metodos na classe matrix
-    [ ] Calcular Inversa
-    [ ] Calcular Determinante
+    [X] Calcular Inversa
+    [X] Calcular Determinante
+    [X] Adjunta
+    [X] Transposta
+    [ ] Reformular o calculo da inversa ( ta levando muito tempo, tentar LU
+        decomposition)
 [ ] Montar o BnP
     [ ]
     [ ]

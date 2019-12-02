@@ -1,55 +1,44 @@
 #include <iostream>
+#include <math.h>
 
 #include "data_reader.h"
 #include "bnp_gc.h"
 #include "matrix.h"
+#include "revised_simplex.h"
 
 int main(int argc, char **argv)
 {
 
     // Leitura da instancia para o bnp
-    DataReader<int> *data = new DataReader<int>(argc, argv[1]);
-    std::vector<int> W = data->getW();
-    // int c = data->getCap();
+    DataReader<double> *data = new DataReader<double>(argc, argv[1]);
+    std::vector<double> _W = data->getW();
+    Matrix<double> W(_W);         // weights of the items
+    unsigned n = data->getN();    // number of items
+    int c = data->getCap();       // bin capacity
+    Matrix<double> b(n, 1, 1);    // right hand side of the constraints
+    Matrix<double> C(n, 1, 1);    // patterns in objective function
+    double tol_gc = pow(10, -10); // tolerancia
 
-    Matrix<double> M(4, "EYE");
-    M(0, 0) = 5;
-    M(0, 1) = -2;
-    M(0, 2) = 2;
-    M(0, 3) = 7;
+    // BFS
+    // Aqui to utilizando a aproximacao singleton (um item em cada bin), sei que
+    // uma aproximacao mais adequada seria utilizando um algoritmo de FFD
+    // (First Fit Decreasing Algorithm) refinado, mas por simplicidade vou manter
+    // singleton por hora.
+    // Matrix<double> B(n, "EYE");
 
-    M[1][1] = 1;
-    M[1][1] = 0;
-    M[1][2] = 0;
-    M[1][3] = 3;
+    Matrix<double> B(10, "EYE");
+    Matrix<double> B2 = B.inverse();
 
-    M(2, 2) = -3;
-    M(2, 2) = 1;
-    M(2, 2) = 5;
-    M(2, 3) = 0;
-
-    M(3, 3) = 3;
-    M(3, 3) = -1;
-    M(3, 3) = -9;
-    M(3, 3) = 4;
-
-    // Matrix<double> M_adj = M.adjoint();
-
-    for (unsigned i = 0; i < M.get_rows(); i++)
+    for (unsigned i = 0; i < 10; i++)
     {
-        for (unsigned j = 0; j < M.get_cols(); j++)
+        for (unsigned j = 0; j < 10; j++)
         {
-            std::cout << " " << M[i][j];
+            std::cout << " " << B2[i][j];
         }
         std::cout << std::endl;
     }
 
-    // std::cout << "DETERMINANT: " << M.determinant(M, M.get_rows()) << std::endl;
-
-    // for (auto &i : W)
-    // {
-    //     std::cout << i << std::endl;
-    // }
+    // RV soluc = rv_simplex(W, b, C, B, c, tol_gc, n);
 
     return 0;
 }

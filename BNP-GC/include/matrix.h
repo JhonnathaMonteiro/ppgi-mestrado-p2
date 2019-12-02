@@ -13,14 +13,14 @@ class Matrix
 {
 private:
   std::vector<std::vector<T>> mat;
-  std::vector<std::vector<T>> _inv;
   unsigned rows;
   unsigned cols;
 
 public:
   Matrix(unsigned _rows, unsigned _cols, const T &_initial);
   Matrix(unsigned _size, std::string _m_type);
-  Matrix(const Matrix<T> &rhs); // Construtor por copia
+  Matrix(const Matrix<T> &rhs);      // Construtor por copia
+  Matrix(const std::vector<T> &rhs); // Construtor por copia de vetor
   virtual ~Matrix();
 
   // Sobrecarga de operadores para operacoes basicas
