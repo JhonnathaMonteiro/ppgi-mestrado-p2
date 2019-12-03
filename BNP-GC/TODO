@@ -13,6 +13,10 @@ da formulação com um número exponencial de variáveis via geração de coluna
     [X] Transposta
     [ ] Reformular o calculo da inversa ( ta levando muito tempo, tentar LU
         decomposition)
+[ ] Resolvedor para o knapsack 01
+    [x] Resolvedor por programacao dinamica
+    [x] Compilar com o codigo base
+    [ ] Consertar possivel bug no loop da linha 39 knapsack_solve.cpp
 [ ] Montar o BnP
     [ ]
     [ ]

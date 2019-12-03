@@ -21,6 +21,7 @@ public:
   Matrix(unsigned _size, std::string _m_type);
   Matrix(const Matrix<T> &rhs);      // Construtor por copia
   Matrix(const std::vector<T> &rhs); // Construtor por copia de vetor
+  Matrix(){};
   virtual ~Matrix();
 
   // Sobrecarga de operadores para operacoes basicas
@@ -33,7 +34,6 @@ public:
   Matrix<T> &operator*=(const Matrix<T> &rhs);
 
   Matrix<T> transpose();
-  Matrix<T> adjoint();
   Matrix<T> inverse();
   Matrix<T> cofactor(Matrix<T> &A, unsigned p, unsigned q, unsigned n);
 
@@ -45,7 +45,7 @@ public:
   Matrix<T> operator*(const T &rhs);
   Matrix<T> operator/(const T &rhs);
 
-  // Matrix/vector operations
+  // Matrix/vector operacoes
   std::vector<T> operator*(const std::vector<T> &rhs);
   std::vector<T> diag_vec();
 

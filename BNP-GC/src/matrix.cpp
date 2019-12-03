@@ -164,7 +164,7 @@ Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &rhs)
 template <typename T>
 Matrix<T> Matrix<T>::operator*(const Matrix<T> &rhs)
 {
-  unsigned rows = rhs.get_rows();
+  unsigned rows = this->get_rows();
   unsigned cols = rhs.get_cols();
   Matrix result(rows, cols, 0.0);
 
@@ -172,7 +172,7 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &rhs)
   {
     for (unsigned j = 0; j < cols; j++)
     {
-      for (unsigned k = 0; k < rows; k++)
+      for (unsigned k = 0; k < rhs.get_rows(); k++)
       {
         result(i, j) += this->mat[i][k] * rhs(k, j);
       }
@@ -195,12 +195,12 @@ Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &rhs)
 template <typename T>
 Matrix<T> Matrix<T>::transpose()
 {
-  Matrix result(rows, cols, 0.0);
+  Matrix result(cols, rows, 0.0);
   for (unsigned i = 0; i < rows; i++)
   {
     for (unsigned j = 0; j < cols; j++)
     {
-      result(i, j) = this->mat[j][i];
+      result(j, i) = this->mat[i][j];
     }
   }
 
@@ -212,41 +212,86 @@ template <typename T>
 Matrix<T> Matrix<T>::inverse()
 {
   Matrix result(rows, cols, 0.0);
-  T det = this->determinant(*this, this->get_rows());
-  Matrix<T> adj = this->adjoint();
-  for (unsigned row = 0; row < this->get_rows(); row++)
+
+  // Decomposicao LU
+  int n = (int)mat.size();
+  std::vector<std::vector<double>> L(n, std::vector<double>(n, 0));
+  std::vector<std::vector<double>> U(n, std::vector<double>(n, 0));
+
+  for (int i = 0; i < n; i++)
   {
-    for (unsigned col = 0; col < this->get_cols(); col++)
+
+    // Triangular superior
+    for (int k = i; k < n; k++)
     {
-      result[row][col] = adj[row][col] / det;
+
+      // Soma L(i, j) * U(j, k)
+      int sum = 0;
+      for (int j = 0; j < i; j++)
+        sum += (L[i][j] * U[j][k]);
+
+      // Eval U(i, k)
+      U[i][k] = mat[i][k] - sum;
+    }
+
+    // Triangular iferior
+    for (int k = i; k < n; k++)
+    {
+      if (i == k)
+        L[i][i] = 1; // Diagonal como sendo 1
+      else
+      {
+
+        // Soma de L(k, j) * U(j, i)
+        int sum = 0;
+        for (int j = 0; j < i; j++)
+          sum += (L[k][j] * U[j][i]);
+
+        // Avaliando L(k, i)
+        L[k][i] = (mat[k][i] - sum) / U[i][i];
+      }
     }
   }
-  return result;
-}
 
-// Adjunta
-template <typename T>
-Matrix<T> Matrix<T>::adjoint()
-{
-  Matrix result(rows, cols, 0.0);
-  if (mat.size() == 1)
+  // calculando inverca
+  std::vector<std::vector<double>> I(n, std::vector<double>(n, 0));
+  std::vector<std::vector<double>> D(n, std::vector<double>(n, 0));
+  for (int i = 0; i < n; i++)
   {
-    result[0][0] = 1;
-    return result;
+    I[i][i] = I[i][i] = 1;
+    D[i][i] = 1 / mat[i][i];
   }
-
-  int sign = 1;
-  for (unsigned row = 0; row < this->get_rows(); row++)
+  double tmp = 0;
+  for (int i = 0; i < n; i++)
   {
-    for (unsigned col = 0; col < this->get_cols(); col++)
+    for (int j = 1; j < n; j++)
     {
-      Matrix<T> temp = cofactor(*this, row, col, this->get_rows());
-      sign = ((row + col) % 2 == 0) ? 1 : -1;
-
-      result[col][row] = (sign) * (determinant(temp, this->get_rows() - 1));
+      for (int k = 0; k <= j - 1; k++)
+      {
+        tmp += mat[j][k] * D[k][i];
+      }
+      D[j][i] = (I[j][i] - tmp) / mat[j][j];
+      tmp = 0;
     }
   }
 
+  for (int i = 0; i < n; i++)
+  {
+    result.mat[n - 1][i] = D[n - 1][i];
+  }
+
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = n - 2; j >= 0; j--)
+    {
+      for (int k = n - 1; k > j; k--)
+      {
+        tmp += U[j][k] * result.mat[k][i];
+      }
+      result.mat[j][i] = D[j][i] - tmp;
+      tmp = 0;
+    }
+  }
   return result;
 }
 

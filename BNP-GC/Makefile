@@ -38,6 +38,8 @@ release: CXXFLAGS += -O3
 release: all
 
 test: release
+	./build/apps/$(TARGET) ./instances/binpack0.txt
+test2: release
 	./build/apps/$(TARGET) ./instances/binpack1.txt
 
 clean:

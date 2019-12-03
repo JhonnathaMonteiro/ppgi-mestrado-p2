@@ -24,21 +24,28 @@ int main(int argc, char **argv)
     // uma aproximacao mais adequada seria utilizando um algoritmo de FFD
     // (First Fit Decreasing Algorithm) refinado, mas por simplicidade vou manter
     // singleton por hora.
-    // Matrix<double> B(n, "EYE");
+    Matrix<double> B(n, "EYE");
 
-    Matrix<double> B(10, "EYE");
-    Matrix<double> B2 = B.inverse();
+    // Matrix<double> B(10, "EYE");
+    // Matrix<double> B2 = B.inverse();
 
-    for (unsigned i = 0; i < 10; i++)
+    // for (unsigned i = 0; i < 10; i++)
+    // {
+    //     for (unsigned j = 0; j < 10; j++)
+    //     {
+    //         std::cout << " " << B2[i][j];
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    RV soluc = rv_simplex(W, b, C, B, c, tol_gc, n);
+    std::cout << "==========SOLUCAO==========" << std::endl;
+    std::cout << "OTIMO: " << data->getOpt() << std::endl;
+    for (unsigned i = 0; i < n; i++)
     {
-        for (unsigned j = 0; j < 10; j++)
-        {
-            std::cout << " " << B2[i][j];
-        }
-        std::cout << std::endl;
+        /* code */
+        std::cout << "X_B: " << soluc.X_B[i][0] << std::endl;
     }
-
-    // RV soluc = rv_simplex(W, b, C, B, c, tol_gc, n);
 
     return 0;
 }
