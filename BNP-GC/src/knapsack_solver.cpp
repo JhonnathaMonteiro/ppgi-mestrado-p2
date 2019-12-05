@@ -1,61 +1,55 @@
 // A Dynamic Programming based solution for 0-1 Knapsack problem
 #include <stdio.h>
 #include <iostream>
+#include <cstdlib>
 #include "knapsack_solver.h"
 
-// A utility function that returns maximum of two integers
-int _max(int a, int b) { return (a > b) ? a : b; }
-
-std::vector<double> _disclosure_content(std::vector<std::vector<int>> &contentMatrix,
-                                        Matrix<double> &W)
-{
-  unsigned n = contentMatrix.size() - 1;
-  unsigned capacidade = contentMatrix[0].size() - 1;
-  unsigned k = capacidade;
-  std::vector<double> content(n);
-
-  for (unsigned i = n; i != 0; i--)
-  {
-    if (contentMatrix[i][k] == 1)
-    {
-      content[i - 1] = 1;
-      k = capacidade - W[0][i - 1];
-    }
-  }
-  return content;
-}
-
-// Algoritmo para resolucao do knapsack-0-1 Pseudo Polinomial O(nm)
-Matrix<double> knapsack_solver(Matrix<double> &W,
-                               Matrix<double> &PI,
-                               double c)
+Matrix<double> kp_solver(Matrix<double> &W,
+                         Matrix<double> &PI, int c)
 {
   int n = (int)W.get_cols();
-  int i, w;
-  std::vector<std::vector<int>> K(n + 1, std::vector<int>(c + 1));
-  std::vector<std::vector<int>> contentMatrix(n + 1, std::vector<int>(c + 1));
-
-  // Build table K[][] in bottom up manner
-  for (i = 1; i != n + 1; i++)
+  Matrix<double> s(n, 1, 0);
+  // gerando o conjunto de itens
+  std::vector<item_t> items(n);
+  for (int i = 0; i < n; i++)
   {
-    for (w = 0; w != c + 1; w++)
+    item_t item = {(int)W[0][i], PI[0][i]};
+    items[i] = item;
+  }
+
+  // programacao dinamica
+  int i, j, a, b, *mm, **m;
+  mm = (int *)calloc((n + 1) * (c + 1), sizeof(int));
+  m = (int **)malloc((n + 1) * sizeof(int *));
+  m[0] = mm;
+  for (i = 1; i <= n; i++)
+  {
+    m[i] = &mm[i * (c + 1)];
+    for (j = 0; j <= c; j++)
     {
-      if (w - W[0][i - 1] >= 0)
+      if (items[i - 1].weight > j)
       {
-        if (K[i - 1][w] < (K[i - 1][w - W[0][i - 1]] + PI[0][i - 1]))
-        {
-          K[i][w] = _max(PI[0][i - 1] + K[i - 1][w - W[0][i - 1]], K[i - 1][w]);
-          contentMatrix[i][w] = 1;
-        }
-        else
-        {
-          K[i][w] = K[i - 1][w];
-        }
+        m[i][j] = m[i - 1][j];
+      }
+      else
+      {
+        a = m[i - 1][j];
+        b = m[i - 1][j - items[i - 1].weight] + items[i - 1].value;
+        m[i][j] = a > b ? a : b;
       }
     }
   }
+  for (i = n, j = c; i > 0; i--)
+  {
+    if (m[i][j] > m[i - 1][j])
+    {
+      s[i - 1][0] = 1;
+      j -= items[i - 1].weight;
+    }
+  }
 
-  Matrix<double> result(_disclosure_content(contentMatrix, W));
-  result = result.transpose();
-  return result;
+  // liberando memoria
+  free(mm);
+  free(m);
+  return s;
 }

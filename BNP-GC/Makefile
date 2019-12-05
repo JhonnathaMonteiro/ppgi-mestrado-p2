@@ -39,8 +39,12 @@ release: all
 
 test: release
 	./build/apps/$(TARGET) ./instances/binpack0.txt
-test2: release
-	./build/apps/$(TARGET) ./instances/binpack1.txt
+# test1: release
+# 	./build/apps/$(TARGET) ./instances/binpack1.txt
+# test2: release
+# 	./build/apps/$(TARGET) ./instances/binpack2.txt
+# test3: release
+# 	./build/apps/$(TARGET) ./instances/binpack3.txt
 
 clean:
 	-@rm -rvf $(OBJ_DIR)/*

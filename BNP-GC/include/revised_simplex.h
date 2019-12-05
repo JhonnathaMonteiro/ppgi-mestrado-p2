@@ -14,6 +14,6 @@ RV rv_simplex(Matrix<double>,
               Matrix<double>,
               Matrix<double>,
               Matrix<double>,
-              double, double, unsigned);
+              int, double, unsigned);
 
 #endif // RV_SIMPLEX_H_INCLUDED

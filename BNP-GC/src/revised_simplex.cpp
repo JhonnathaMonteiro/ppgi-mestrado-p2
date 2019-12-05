@@ -4,18 +4,17 @@
 #include "revised_simplex.h"
 #include "matrix.h"
 #include "knapsack_solver.h"
+#include "ffd_refinement.h"
 
 RV rv_simplex(Matrix<double> W,
               Matrix<double> b,
               Matrix<double> C,
               Matrix<double> B,
-              double c, double tol_gc, unsigned n)
+              int c, double tol_gc, unsigned n)
 {
-  B[3][0] = 1;
-  B[2][1] = 1;
-  B[3][2] = 1;
-  // TODO: Um refinamento pode ser feito na BSI para diminuir a quantidade
-  //       de colunas geradas.
+
+  // (Sigleton - Defaul)
+  ffd_refinament(B, W, b, c); // (Refinamento FFD)
 
   // Declaracoes
   Matrix<double> B_inv = B.inverse(); // Calculo da inversa (uma vez por no)
@@ -27,14 +26,15 @@ RV rv_simplex(Matrix<double> W,
 
   while (true)
   {
+    std::cout << counter << std::endl;
     X_B = B_inv * b;
     PI = C.transpose() * B_inv;
     OPT = (PI * b)[0][0];
 
     // Encontrando a coluna que vai entrar na base
     // Resolver o KnapSack 0-1: Max PI*Xe; st. W*Xe <= c, Xe e {0,1}
-    // Encontrar Xe
-    Xe = knapsack_solver(W, PI, c);
+    // Encontrar Xe (coluna)
+    Xe = kp_solver(W, PI, c);
 
     r = (PI * Xe)[0][0] - 1; // Custo reduzido
 
@@ -69,8 +69,8 @@ RV rv_simplex(Matrix<double> W,
         break;
       }
 
-      // TESTE
-      std::cout << "GC: " << counter << std::endl;
+      // Contador de colunas
+      // std::cout << "GC: " << counter << std::endl;
       ++counter;
 
       pivot = _Xe[l][0];

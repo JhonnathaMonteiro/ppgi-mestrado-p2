@@ -3,8 +3,13 @@
 
 #include "matrix.h"
 
-Matrix<double> knapsack_solver(Matrix<double> &,
-                               Matrix<double> &,
-                               double);
+typedef struct
+{
+  int weight;
+  double value;
+} item_t;
+
+Matrix<double> kp_solver(Matrix<double> &W,
+                         Matrix<double> &PI, int c);
 
 #endif // KNAPSACK_SOLVER_H_INCLUDED

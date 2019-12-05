@@ -5,6 +5,7 @@
 #include "bnp_gc.h"
 #include "matrix.h"
 #include "revised_simplex.h"
+#include "ffd_refinement.h"
 
 int main(int argc, char **argv)
 {
@@ -26,26 +27,27 @@ int main(int argc, char **argv)
     // singleton por hora.
     Matrix<double> B(n, "EYE");
 
-    // Matrix<double> B(10, "EYE");
-    // Matrix<double> B2 = B.inverse();
-
-    // for (unsigned i = 0; i < 10; i++)
-    // {
-    //     for (unsigned j = 0; j < 10; j++)
-    //     {
-    //         std::cout << " " << B2[i][j];
-    //     }
-    //     std::cout << std::endl;
-    // }
+    std::cout << "Instance: " << data->getID() << std::endl;
 
     RV soluc = rv_simplex(W, b, C, B, c, tol_gc, n);
     std::cout << "==========SOLUCAO==========" << std::endl;
-    std::cout << "OTIMO: " << data->getOpt() << std::endl;
     for (unsigned i = 0; i < n; i++)
     {
         /* code */
-        std::cout << "X_B: " << soluc.X_B[i][0] << std::endl;
+        std::cout << "X_B[" << i << "]: " << soluc.X_B[i][0] << std::endl;
     }
+
+    std::cout << "==========MATRIZ==========" << std::endl;
+    for (unsigned i = 0; i < n; i++)
+    {
+        for (unsigned j = 0; j < n; j++)
+        {
+            std::cout << " " << soluc.B[i][j];
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "==========BINS==========" << std::endl;
+    std::cout << "OTIMO (BINS): " << soluc.OPTCG << std::endl;
 
     return 0;
 }
