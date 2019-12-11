@@ -100,7 +100,7 @@ If you are in linux you can use makefile (modify it according to your cplex vers
 ```shell
 $ make <instance>
 ```
-Were <instance> can be any instance name in data folder.
+Were instance can be any instance name in data folder:
 ```shell
 $ make IN02_120_150u
 ```
@@ -112,6 +112,7 @@ $ make IN02_120_150u
 - <a href="http://repositorio.unicamp.br/bitstream/REPOSIP/321614/1/Borges_YulleGlebbyoFelipe_M.pdf" target="_blank">`Yulle Glebbyo Felipe Borges`</a>
 
 ---
+## Contributing
 
 ### Step 1
 
