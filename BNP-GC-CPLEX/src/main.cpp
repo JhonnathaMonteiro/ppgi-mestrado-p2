@@ -6,6 +6,14 @@
 
 #include "models.h"
 
+/* Valores otimos das instancias
+* IN02_120_150u = 46 bins (test2)
+* IN03_250_150u = 99 bins (test3)
+* IN04_500_150u = 201 bins (test4)
+* Retiradas e adaptadas
+* de (OR - Library) http://people.brunel.ac.uk/~mastjjb/jeb/info.html
+*/
+
 int N_ITEMS;
 double CAPACIDADE_BIN;
 std::vector<double> PesoItens;
@@ -62,7 +70,7 @@ int main(int argc, char *argv[])
     int iter = 0;
 
     // Exportando o modelo inicial
-    mestre.cplex.exportModel("model/modelo_incial.lp"); // exportando o modelo
+    // mestre.cplex.exportModel("model/modelo_incial.lp"); // exportando o modelo inicial
 
     do
     {
@@ -90,11 +98,14 @@ int main(int argc, char *argv[])
         std::cout << std::endl;
     } while (novaColuna > 0);
 
-    mestre.cplex.exportModel("model/modelo_final.lp"); // exportando o modelo
+    // mestre.cplex.exportModel("model/modelo_final.lp"); // exportando o modelo final
 
     std::cout << "\n\n============ RESULTADO ==============" << std::endl;
     // mestre.imprimir_solucao(); // imprimir lambda
     double gc = mestre.getObjective();
+    auto status = mestre.cplex.getStatus();
+
+    std::cout << std::setprecision(10) << "Status = " << status << std::endl;
     std::cout << std::setprecision(10) << "SOLUCAO (MESTRE) = " << mestre.getObjective() << std::endl;
     std::cout << std::setprecision(10) << "Quantidade de Bins = " << std::ceil(gc) << std::endl;
 

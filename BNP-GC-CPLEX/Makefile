@@ -9,7 +9,7 @@
 
 ###################### CONFIGURACOES ###########################
 # Executavel
-TARGET   = PMCC
+TARGET   = BIN_GC
 
 # diretorios com os source files e com os objs files
 SRCDIR      = src
@@ -80,6 +80,8 @@ test2: release
 	./$(APPDIR)/$(TARGET) ./data/IN02_120_150u.dat
 test3: release
 	./$(APPDIR)/$(TARGET) ./data/IN03_250_150u.dat
+test4: release
+	./$(APPDIR)/$(TARGET) ./data/IN04_500_150u.dat
 ################################################################
 
 
