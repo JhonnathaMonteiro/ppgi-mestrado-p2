@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
     //criar o mestre
     Master mestre(N_ITEMS, CAPACIDADE_BIN, PesoItens);
     mestre.setStreamOff();
-    // mestre.criar_colunas_artificiais();
 
     //criar o subproblema
     Subproblem sub(N_ITEMS, CAPACIDADE_BIN, PesoItens);

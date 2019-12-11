@@ -15,7 +15,8 @@ void Master::criar_modelo()
 {
   //criar array de variaveis e coeficientes
   lambda = IloNumVarArray(this->env, N_ITEMS, 0.0, 1.0);
-  Range1 = IloRangeArray(this->env); // range das restricoes
+  Range1 = IloRangeArray(this->env);
+
   // Definindo a FO e as Retricoes
   const double BIGM = 10.0;
   IloExpr fo_sum(this->env);
