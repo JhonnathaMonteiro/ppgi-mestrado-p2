@@ -74,13 +74,13 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 
 
 ###################  CRIAR TESTES AQUI! ########################
-test1: release
+IN01_005_115: release
 	./$(APPDIR)/$(TARGET) ./data/IN01_005_115.dat
-test2: release
+IN02_120_150u: release
 	./$(APPDIR)/$(TARGET) ./data/IN02_120_150u.dat
-test3: release
+IN03_250_150u: release
 	./$(APPDIR)/$(TARGET) ./data/IN03_250_150u.dat
-test4: release
+IN04_500_150u: release
 	./$(APPDIR)/$(TARGET) ./data/IN04_500_150u.dat
 ################################################################
 

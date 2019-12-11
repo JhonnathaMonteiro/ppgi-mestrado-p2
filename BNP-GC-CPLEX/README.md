@@ -89,12 +89,21 @@ $ make build
 ---
 
 ### Usage
-> go to build/apps/ directory and run
+Go to build/apps/ directory and run
 
 ```shell
 $ ./program <path_to_instance>
 ```
 
+If you are in linux you can use makefile (modify it according to your cplex version)
+
+```shell
+$ make <instance>
+```
+Were <instance> can be any instance name in data folder.
+```shell
+$ make IN02_120_150u
+```
 ---
 
 ## Documentation
